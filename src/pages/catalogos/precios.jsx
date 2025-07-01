@@ -398,22 +398,22 @@ const handleGuardarPrecio = async () => {
                                 </th>
                                 <th className="px-3 py-2 text-left">Nombre
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.nombre || ""}
                                             onChange={(e) => handleFilterChange("nombre", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Descripcion
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.descripcion || ""}
                                             onChange={(e) => handleFilterChange("descripcion", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">

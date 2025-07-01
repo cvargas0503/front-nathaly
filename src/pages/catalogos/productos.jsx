@@ -102,9 +102,9 @@ export default function Productos() {
             }, 3000);
         }
     };
-    const handleExportPDF = () => {
-        alert("Funcionalidad de exportar a PDF pendiente de implementar.");
-    };
+    // const handleExportPDF = () => {
+    //     alert("Funcionalidad de exportar a PDF pendiente de implementar.");
+    // };
 
 
     const handleFilterChange = (key, value) => {
@@ -233,13 +233,7 @@ const handleGuardarProducto = async (form) => {
                             <span className="mr-2">+</span>
                             Nuevo
                         </button>
-                        <button
-                            onClick={handleExportPDF}
-                            className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded shadow hover:from-pink-600 hover:to-red-600 transition"
-                        >
-                            <span className="mr-2">📄</span>
-                            Exportar a PDF
-                        </button>
+                 
                         {selected.length > 0 && (
                             <button
                                 onClick={handleDeleteSelected}
@@ -290,12 +284,12 @@ const handleGuardarProducto = async (form) => {
                                                                 <th className="px-3 py-2 text-left">Imagen</th>
                                 <th className="px-3 py-2 text-left">Código
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.codigo || ""}
                                             onChange={(e) => handleFilterChange("codigo", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 {/* <th className="px-3 py-2 text-left">Apellidos
@@ -310,92 +304,92 @@ const handleGuardarProducto = async (form) => {
                                 </th> */}
                                 <th className="px-3 py-2 text-left">Referencia
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.referencia || ""}
                                             onChange={(e) => handleFilterChange("referencia", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Descripcion
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.descripcion || ""}
                                             onChange={(e) => handleFilterChange("descripcion", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Categoria
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.categoria || ""}
                                             onChange={(e) => handleFilterChange("categoria", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Marca
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.marca || ""}
                                             onChange={(e) => handleFilterChange("marca", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Linea
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.linea || ""}
                                             onChange={(e) => handleFilterChange("linea", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                  <th className="px-3 py-2 text-left">Proveedor
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.proveedor || ""}
                                             onChange={(e) => handleFilterChange("proveedor", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                  <th className="px-3 py-2 text-left">Existencia Mínima
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.existenciaMin || ""}
                                             onChange={(e) => handleFilterChange("existenciaMin", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                  <th className="px-3 py-2 text-left">Existencia Máxima
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.existenciaMax || ""}
                                             onChange={(e) => handleFilterChange("existenciaMax", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                  <th className="px-3 py-2 text-left">Costo
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.costo || ""}
                                             onChange={(e) => handleFilterChange("costo", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">

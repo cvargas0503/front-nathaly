@@ -72,10 +72,10 @@ const sidebarSections = [
         ],
     },
     {
-        title: "FACTURA",
+        title: "VENTAS",
         icon: HiOutlineDocumentText,
         links: [
-            { name: "Facturas", to: "/facturas", icon: HiOutlineDocumentText, perm: "VER_VENTAS" },
+            { name: "Ventas", to: "/facturas", icon: HiOutlineDocumentText, perm: "VER_VENTAS" },
         ],
     },
     {

@@ -248,9 +248,9 @@ export default function CompraFormulario() {
               <th className="py-2">Descripción</th>
               <th className="py-2">Cantidad</th>
               <th className="py-2">Costo</th>
-              <th className="py-2">Precio 1</th>
-              <th className="py-2">Precio 2</th>
-              <th className="py-2">Precio 3</th>
+              {/* <th className="py-2">Precio 1</th>
+              <th className="py-2">Precio 2</th> */}
+              {/* <th className="py-2">Precio 3</th> */}
               <th className="py-2">Total</th>
             </tr>
           </thead>
@@ -279,9 +279,9 @@ export default function CompraFormulario() {
                     className="border border-gray-300 px-2 py-1 w-24 rounded-lg text-center"
                   />
                 </td>
-                <td className="py-2">{p.precio1}</td>
+                {/* <td className="py-2">{p.precio1}</td>
                 <td className="py-2">{p.precio2}</td>
-                <td className="py-2">{p.precio3}</td>
+                <td className="py-2">{p.precio3}</td> */}
                 <td className="py-2">
                   {((p.cantidad || 0) * (p.costo || 0)).toFixed(2)} 
                 </td>

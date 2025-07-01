@@ -58,8 +58,8 @@ const Facturas = () => {
       }
     }
     catch (error) {
-      console.error("Error al obtener las facturas:", error);
-      toast.error("Error al cargar las facturas.");
+      console.error("Error al obtener las VENTAS:", error);
+      toast.error("Error al cargar las VENTASs.");
     }
 
   }
@@ -82,8 +82,8 @@ const Facturas = () => {
     toast.success(`Factura ${facturaSeleccionada.numeroVenta} anulada exitosamente.`);
     setMostrarDialogoAnular(false)
   } catch (error) {
-    console.error("Error al anular la factura:", error);
-    toast.error("Error al anular la factura. Por favor, inténtelo de nuevo más tarde.");
+    console.error("Error al anular la VENTAS:", error);
+    toast.error("Error al anular la VENTAS. Por favor, inténtelo de nuevo más tarde.");
     }
   };
 
@@ -164,11 +164,11 @@ const imprimirFactura = () => {
     <Layout>
       <div className="p-4 md:p-8">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Listado de Facturas</h1>
+          <h1 className="text-2xl font-bold">Listado de Ventas</h1>
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Buscar factura, empleado, cliente..."
+              placeholder="Buscar Ventas, empleado, cliente..."
               value={filtro}
               onChange={handleFiltroChange}
               className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -185,7 +185,7 @@ const imprimirFactura = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>N. Factura</TableHead>
+                  <TableHead>N. Venta</TableHead>
                   <TableHead>Empleado</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Fecha</TableHead>
@@ -199,7 +199,7 @@ const imprimirFactura = () => {
                 {facturasPaginadas.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-gray-400">
-                      No hay facturas para mostrar.
+                      No hay Venta para mostrar.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -307,11 +307,11 @@ const imprimirFactura = () => {
         <Dialog open={mostrarDialogoAnular} onOpenChange={setMostrarDialogoAnular}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>¿Desea anular esta factura?</DialogTitle>
+              <DialogTitle>¿Desea anular esta venta?</DialogTitle>
             </DialogHeader>
             <div className="py-4 text-center">
               <p className="text-lg mb-4">
-                Está a punto de anular la factura <strong>{facturaSeleccionada?.numeroVenta}</strong>. ¿Está seguro?
+                Está a punto de anular la venta <strong>{facturaSeleccionada?.numeroVenta}</strong>. ¿Está seguro?
               </p>
               <div className="flex justify-center gap-4">
                 <Button variant="outline" onClick={() => setMostrarDialogoAnular(false)}>
@@ -335,7 +335,7 @@ const imprimirFactura = () => {
           <VentaCarta venta={facturaParaImprimir} modoImpresion={true} />
         </div>
       ) : (
-        <p className="text-red-500">No se pudo cargar la factura.</p>
+        <p className="text-red-500">No se pudo cargar la venta.</p>
       )}
 
       <div className="flex gap-4 mt-4 mb-2">

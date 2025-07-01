@@ -412,62 +412,62 @@ const handleGuardarProveedor = async () => {
                                 </th>
                                 <th className="px-3 py-2 text-left">Nombre
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.nombre || ""}
                                             onChange={(e) => handleFilterChange("nombre", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Razón Social
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.razonSocial || ""}
                                             onChange={(e) => handleFilterChange("razonSocial", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">RUC
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.ruc || ""}
                                             onChange={(e) => handleFilterChange("ruc", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Direccion
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.direccion || ""}
                                             onChange={(e) => handleFilterChange("direccion", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Télefono
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.telefono || ""}
                                             onChange={(e) => handleFilterChange("telefono", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Correo
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.email || ""}
                                             onChange={(e) => handleFilterChange("email", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">
