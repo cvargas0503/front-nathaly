@@ -30,3 +30,12 @@ export const guardarArqueoAPI = async (data) => {
         throw error;
     }    
 }
+
+export const obtenerPDFArqueo = async (id) => {
+    try {
+        const response = await axiosConfig.get(`/arqueos/arqueo/reporte/${id}`, { responseType: "blob" });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }    
+}

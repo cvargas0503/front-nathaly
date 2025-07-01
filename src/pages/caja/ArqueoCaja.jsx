@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiPrinter, FiChevronDown, FiCalendar, FiUser, FiMapPin, FiSave, FiXCircle } from "react-icons/fi";
 import Layout from "../../components/general/layout";
 import { toast } from "react-toastify";
-import { obtenerDatosArqueoIni, cargarArqueoAPI, guardarArqueoAPI } from "../../services/arqueo";
+import { obtenerDatosArqueoIni, cargarArqueoAPI, guardarArqueoAPI, obtenerPDFArqueo } from "../../services/arqueo";
 import LoadingComponent from "../../components/auth/loadingComponent";
 
 function DenominationInput({ title, values, setValues, color }) {
@@ -47,7 +47,7 @@ export default function ArqueoCaja() {
     const [arqueoAbierto, setArqueoAbierto] = useState(false);
     const [loading, setLoading] = useState(true);
     const [cerrarHabilitado, setCerrarHabilitado] = useState(false);
-
+    const [idArqueo, setIdArqueo] = useState(0);
     const [cordobaIni, setCordobaIni] = useState([]);
     const [dollarIni, setDollarIni] = useState([]);
     const [cordobaFin, setCordobaFin] = useState([]);
@@ -90,6 +90,7 @@ export default function ArqueoCaja() {
             setDollarIni(response.data.saldoInicialDolar);
             setCordobaFin(response.data.saldoFinalCordoba);
             setDollarFin(response.data.saldoFinalDolar);
+            setIdArqueo(response.data.idArqueo);
             setArqueoAbierto(true);
             if (!response.abierto) {
                 toast.info("No hay arqueo abierto para esta fecha.");
@@ -148,6 +149,46 @@ export default function ArqueoCaja() {
         finally {
             setLoading(false);
         }
+    }
+
+    const imprimirArqueo = async () => {
+        if (!idArqueo) {
+            toast.error("No hay arqueo para imprimir.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const html = await obtenerPDFArqueo(idArqueo);
+            const blob = new Blob([html], { type: "application/pdf" });
+            const blobUrl = URL.createObjectURL(blob);
+
+            const iframe = document.createElement("iframe");
+            iframe.style.position = "fixed";
+            iframe.style.right = "0";
+            iframe.style.bottom = "0";
+            iframe.style.width = "0";
+            iframe.style.height = "0";
+            iframe.style.border = "0";
+            iframe.src = blobUrl;
+
+            document.body.appendChild(iframe);
+
+            iframe.onload = () => {
+                iframe.contentWindow?.focus();
+                iframe.contentWindow?.print();
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    URL.revokeObjectURL(blobUrl);
+                }, 1000);
+            };
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al intentar imprimir el arqueo.");
+        } finally {
+            setLoading(false);
+        }
+
     }
 
     return (
@@ -215,9 +256,11 @@ export default function ArqueoCaja() {
                                                 <FiXCircle /> Cerrar
                                             </button>
                                         )}
+
                                         <button
-                                            onClick={() => window.print()}
+                                            onClick={imprimirArqueo}
                                             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-400 text-slate-800 hover:bg-yellow-500"
+                                            disabled={!idArqueo}
                                         >
                                             <FiPrinter /> Imprimir
                                         </button>
