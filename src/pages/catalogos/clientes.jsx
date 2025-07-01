@@ -289,12 +289,12 @@ const handleGuardarCliente = async (form) => {
                                 </th>
                                 <th className="px-3 py-2 text-left">Nombre completo
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.nombreCompleto || ""}
                                             onChange={(e) => handleFilterChange("nombreCompleto", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 {/* <th className="px-3 py-2 text-left">Apellidos
@@ -309,52 +309,52 @@ const handleGuardarCliente = async (form) => {
                                 </th> */}
                                 <th className="px-3 py-2 text-left">Identificacion
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.numDoc || ""}
                                             onChange={(e) => handleFilterChange("numDoc", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Direccion
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.direccion || ""}
                                             onChange={(e) => handleFilterChange("direccion", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Celular
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.celular || ""}
                                             onChange={(e) => handleFilterChange("celular", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">Sucursal
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.sucursal || ""}
                                             onChange={(e) => handleFilterChange("sucursal", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">¿Crédito?
                                     <div>
-                                        <input
+                                        {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
                                             placeholder="Filtrar"
                                             value={filters.tieneCredito || ""}
                                             onChange={(e) => handleFilterChange("tieneCredito", e.target.value)}
-                                        />
+                                        /> */}
                                     </div>
                                 </th>
                                 <th className="px-3 py-2 text-left">
