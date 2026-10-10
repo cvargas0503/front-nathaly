@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import {getUser} from "../services/auth"; 
-import Cookies from "js-cookie";
+import { getUser, logout } from "../services/auth";
+import { toast } from "react-toastify";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
   const cargarUsuario = async () => {
     try {
       const res = await getUser();
-      console.log(res);
       setUsuario(res.usuario);
     } catch {
       setUsuario(null);
@@ -19,13 +18,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleLogout = () => {
-    console.log("Cerrando sesión");
-    Cookies.remove("token");
-    setUsuario(null);
-    console.log(Cookies)
-      console.log(Cookies.get("token"));
-    Cookies.remove("token");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUsuario(null);
+      return true;
+    } catch {
+      toast.error("No se pudo cerrar la sesión. Inténtelo nuevamente.");
+      return false;
+    }
   }
 
   useEffect(() => {
