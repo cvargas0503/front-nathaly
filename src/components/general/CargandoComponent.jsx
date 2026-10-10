@@ -1,35 +1,40 @@
 import React from "react";
 
+/**
+ * Inline loading spinner — used within page content areas.
+ * Less intrusive than the full-screen LoadingComponent.
+ */
 const CargandoComponent = () => {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[200px] w-full bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 rounded-xl shadow-lg h-[100vh]">
-            <div className="relative flex items-center justify-center mb-4">
-                <span className="absolute w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-400 via-purple-400 to-blue-400 animate-pulse opacity-60"></span>
-                <svg
-                    className="w-12 h-12 text-indigo-500 animate-spin"
-                    fill="none"
-                    viewBox="0 0 48 48"
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: "rgba(15,23,42,0.5)", backdropFilter: "blur(6px)" }}
+        >
+            <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                    <div
+                        className="w-16 h-16 rounded-full animate-spin"
+                        style={{
+                            border: "3px solid rgba(255,255,255,0.1)",
+                            borderTopColor: "#f59e0b",
+                        }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center"
+                            style={{ background: "linear-gradient(135deg, #1e3a5f, #2a5298)" }}
+                        >
+                            <span className="text-white font-black text-base">N</span>
+                        </div>
+                    </div>
+                </div>
+                <span
+                    className="text-sm font-medium animate-pulse"
+                    style={{ color: "white" }}
                 >
-                    <circle
-                        className="opacity-30"
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        stroke="currentColor"
-                        strokeWidth="6"
-                    />
-                    <path
-                        d="M44 24c0-11.046-8.954-20-20-20"
-                        stroke="currentColor"
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        className="text-purple-500"
-                    />
-                </svg>
+                    Procesando...
+                </span>
             </div>
-            <span className="text-xl font-semibold text-indigo-700 tracking-wide animate-bounce">
-                Cargando...
-            </span>
         </div>
     );
 };
