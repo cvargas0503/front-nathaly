@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { PasswordRequirements, validarPassword } from "../../utils/seguridadContra";
 import { toast } from "react-toastify";
 import { crearUsuario, ObtenerEmpleadosSinUsuario } from "../../services/usuarios";
-const ModalNuevoUsuario = ({setShowNuevo, setUsuarios, usuarios}) => {
+const ModalNuevoUsuario = ({setShowNuevo, setUsuarios}) => {
     const [nuevoEmpleado, setNuevoEmpleado] = useState("");
     const [nuevoUsuario, setNuevoUsuario] = useState("");
     const [nuevoPassword, setNuevoPassword] = useState("");
@@ -29,12 +29,7 @@ const ModalNuevoUsuario = ({setShowNuevo, setUsuarios, usuarios}) => {
             toast.error("Error al obtener empleados");
         }
     };
-    const handleNuevo = () => {
-        setNuevoEmpleado("");
-        setNuevoUsuario("");
-        setNuevoPassword("");
-        setShowNuevo(true);
-    };
+
 
     const guardarNuevo = async() => {
         if (
@@ -75,7 +70,7 @@ const ModalNuevoUsuario = ({setShowNuevo, setUsuarios, usuarios}) => {
             toast.error("Error al guardar nuevo usuario");
         }
 
-        
+
     };
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -109,13 +104,13 @@ const ModalNuevoUsuario = ({setShowNuevo, setUsuarios, usuarios}) => {
                     />
                 </div>
                 <div className="mb-2">
-                    <label className="block text-gray-700 mb-1">Contraseña</label>
+                    <label className="block text-gray-700 mb-1">ContraseÃ±a</label>
                     <input
                         type="password"
                         className="w-full px-3 py-2 border rounded"
                         value={nuevoPassword}
                         onChange={(e) => setNuevoPassword(e.target.value)}
-                        placeholder="Contraseña"
+                        placeholder="ContraseÃ±a"
                     />
                     <PasswordRequirements password={nuevoPassword} />
                 </div>

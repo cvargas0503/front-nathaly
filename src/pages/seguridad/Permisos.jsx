@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import Layout from "../../components/general/layout";
 import { asignarPermisosUsuario, obtenerPermisos, removerPermisosUsuario } from "../../services/permisos";
 import { toast } from "react-toastify";
+import { ObtenerEmpleadosConUsuario } from "../../services/usuarios";
+import CargandoComponent from "../../components/general/CargandoComponent";
 
-const mockEmployees = [
-    { id: 7, name: "Juan Pérez" },
-    { id: 2, name: "Ana Gómez" },
-    { id: 3, name: "Carlos Ruiz" },
-];
+
 
 // const mockRoles = [
 //   {
@@ -40,7 +38,30 @@ export default function Permisos() {
     const [selectedAssigned, setSelectedAssigned] = useState([]);
     const [showAssignDialog, setShowAssignDialog] = useState(false);
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+    const [mockEmployees, setMockEmployees] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        fetchUsuariosEmpleados();
+    }, []);
+
+    const fetchUsuariosEmpleados = async() => {
+        try{
+            setLoading(true);
+            const respuesta = await ObtenerEmpleadosConUsuario();
+            if(!respuesta.success) {
+                toast.error("Error al obtener empleados");
+                return;
+            }
+            setMockEmployees(respuesta.data);
+        }catch(error)
+        {
+            console.error("Error al obtener empleados:", error);
+            toast.error("Error al obtener empleados");
+        }finally{
+            setLoading(false);
+        }
+    }
     useEffect(() => {
         if (selectedEmployee) {
             fetchPermisos(selectedEmployee);
@@ -224,6 +245,7 @@ export default function Permisos() {
     return (
         <Layout>
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center py-10">
+                {loading && <CargandoComponent />}
                 <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8">
                     <h1 className="text-3xl font-bold text-indigo-700 mb-8 text-center">
                         Gestión de Roles y Permisos
