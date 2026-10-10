@@ -1,6 +1,6 @@
 import axiosConfig from '../lib/axios';
 export const crearSucursales = async (form) => {
-    try {
+
         console.log("Crear sucursal", form);
         const dataToSend = new FormData();
         dataToSend.append("imagen", form.imagen); // Debe coincidir con upload.single("imagen")
@@ -15,12 +15,10 @@ export const crearSucursales = async (form) => {
         console.log("Crear sucursal", dataToSend);
         const response = await axiosConfig.post('/sucursales/', dataToSend);
         return response.data;
-    } catch (error) {
-        throw error;
-    }    
+
 }
 export const actualizarSucursal = async (form) => {
-    try {
+
         console.log("actualizar sucursal", form);
         const dataToSend = new FormData();
         if(form.imagen) {
@@ -38,15 +36,11 @@ export const actualizarSucursal = async (form) => {
         console.log("Crear sucursal", dataToSend);
         const response = await axiosConfig.put(`/sucursales/${form.idSucursal}`, dataToSend);
         return response.data;
-    } catch (error) {
-        throw error;
-    }    
+
 }
 export const EliminarSucursal = async (idSucursal) => {
-    try {
+
         const response = await axiosConfig.delete(`/sucursales/${idSucursal}`);
         return response.data;
-    } catch (error) {
-        throw error;
-    }    
+
 }
