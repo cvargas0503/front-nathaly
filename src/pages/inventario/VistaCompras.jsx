@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+
 import Layout from "../../components/general/layout";
 import { toast } from "react-toastify";
 import { ObtenerCompras } from "../../services/compras";
@@ -25,7 +25,7 @@ export default function VerCompras() {
       } else {
         toast.error("Error al cargar las compras.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al cargar las compras.");
     }
   };
@@ -53,26 +53,13 @@ export default function VerCompras() {
     setPaginaActual(nuevaPagina);
   };
 
-  const actualizarEstado = (indice, nuevoEstado) => {
-    const nuevasCompras = [...compras];
-    nuevasCompras[indice].estado = nuevoEstado;
-    setCompras(nuevasCompras);
-  };
+
 
   const calcularTotal = (productos) => {
     return productos.reduce((total, p) => total + p.cantidad * p.costoUnit, 0);
   };
 
-  const obtenerColorEstado = (estado) => {
-    switch (estado) {
-      case "Aceptada":
-        return "bg-green-100 text-green-800";
-      case "Anulada":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-yellow-100 text-yellow-800";
-    }
-  };
+
 
   return (
     <Layout>

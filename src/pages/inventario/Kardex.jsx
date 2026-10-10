@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+
+
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+
 import Layout from "../../components/general/layout";
 import { toast } from "react-toastify";
 import { obtenerKardexGeneral } from "../../services/kardex";
@@ -15,7 +15,7 @@ export default function Kardex() {
   const [bodegaFiltro, setBodegaFiltro] = useState("Todas las Bodegas");
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [kardex, setKardex] = useState([]); 
+  const [kardex, setKardex] = useState([]);
 
   const bodegas = ["Todas las Bodegas", ...Array.from(new Set(kardex.map((p) => p.bodega)))];
 

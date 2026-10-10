@@ -17,7 +17,7 @@ export default function TrasladoBodega() {
   }, []);
 
 
-    
+
 
   const handleBodegaOrigenChange = (e) => {
     const value = e.target.value;
@@ -49,7 +49,7 @@ export default function TrasladoBodega() {
       }
 
       setBodegas(respuesta.data.bodegas || []);
-      
+
     }
     catch (error) {
       console.error("Error fetching data:", error);
@@ -62,7 +62,7 @@ export default function TrasladoBodega() {
   const agregarProductoDesdeModal = (producto) => {
     setProductos([...productos, { ...producto, cantidad: 1 }]);
     setModalVisible(false);
-    setFiltro("");
+
   };
 
   const actualizarCantidad = (index, cantidad) => {
@@ -146,7 +146,7 @@ export default function TrasladoBodega() {
             className="w-full p-2 border rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700"
             onChange={(e) => setFecha(e.target.value)}
             value={fecha}
-            
+
           />
         </div>
 
@@ -156,13 +156,13 @@ export default function TrasladoBodega() {
             <label className="block text-sm text-black-800 mb-1">
               Bodega Origen:
             </label>
-            <select 
+            <select
             className="w-full p-2 border rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700"
             onChange={handleBodegaOrigenChange}
             value={bodegaOrigen}
             >
               <option>Seleccionar</option>
-              {bodegas.map((bodega, index) => (
+              {bodegas.map((bodega) => (
                 <option key={bodega.idBodega} value={bodega.idBodega}>{bodega.nombre}</option>
               ))}
             </select>
@@ -171,13 +171,13 @@ export default function TrasladoBodega() {
             <label className="block text-sm text-black-800 mb-1">
               Bodega Destino:
             </label>
-            <select 
+            <select
             className="w-full p-2 border rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700"
             onChange={handleBodegaDestinoChange}
             value={bodegaDestino}
             >
               <option>Seleccionar</option>
-              {bodegas.map((bodega, index) => (
+              {bodegas.map((bodega) => (
                 <option key={bodega.idBodega} value={bodega.idBodega}>{bodega.nombre}</option>
               ))}
             </select>
@@ -216,7 +216,7 @@ export default function TrasladoBodega() {
             <label className="block text-sm text-black-800 mb-1">
               Empleado que recibe:
             </label>
-            <select 
+            <select
             className="w-full p-2 border rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option>Seleccionar</option>
@@ -298,7 +298,7 @@ export default function TrasladoBodega() {
 
         {/* GUARDAR */}
         <div className="text-center">
-          <button 
+          <button
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded font-bold shadow-md transition duration-200"
           onClick={handleTrasladar}
           >

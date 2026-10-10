@@ -132,7 +132,7 @@ export default function CompraFormulario() {
       const compraData = {
         ...form,
         productos:productos
-        
+
       };
       console.log("Datos de compra a guardar:", compraData);
 
@@ -150,7 +150,7 @@ export default function CompraFormulario() {
     }
   };
 
- 
+
 
   const productosTabla = productosSeleccionados.filter((p) =>
     p.descripcion.toLowerCase().includes(busquedaTabla.toLowerCase()) ||
@@ -177,7 +177,7 @@ export default function CompraFormulario() {
             className="border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
             <option value={0} disabled>Seleccione un proveedor</option>
-            {proveedores.map((prov, i) => (
+            {proveedores.map((prov) => (
               <option key={prov.idProveedor} value={prov.idProveedor}>{prov.nombre}</option>
             ))}
           </select>
@@ -283,7 +283,7 @@ export default function CompraFormulario() {
                 <td className="py-2">{p.precio2}</td>
                 <td className="py-2">{p.precio3}</td> */}
                 <td className="py-2">
-                  {((p.cantidad || 0) * (p.costo || 0)).toFixed(2)} 
+                  {((p.cantidad || 0) * (p.costo || 0)).toFixed(2)}
                 </td>
               </tr>
             ))}

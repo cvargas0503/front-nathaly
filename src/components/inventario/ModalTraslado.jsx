@@ -18,7 +18,7 @@ const ModalTraslado = ({ agregarProductoDesdeModal, setModalVisible, bodegaOrige
         return;
       }
       setInventario(respuesta.data || []);
-    } catch (error) {
+    } catch {
       toast.error("Error al cargar el inventario. Por favor, inténtelo de nuevo más tarde.");
     }
   };
@@ -54,7 +54,7 @@ const ModalTraslado = ({ agregarProductoDesdeModal, setModalVisible, bodegaOrige
               <div
                 key={i}
                 onClick={() => !deshabilitado && agregarProductoDesdeModal(prod)}
-                className={`p-2 border-b rounded cursor-pointer mb-1 
+                className={`p-2 border-b rounded cursor-pointer mb-1
                   ${deshabilitado
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : "hover:bg-blue-100"

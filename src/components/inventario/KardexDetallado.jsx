@@ -76,7 +76,7 @@ const KardexDetallado = ({productoSeleccionado, setMostrarModal}) => {
     autoTable(doc, {
       startY: 60,
       head: [["Fecha", "Concepto", "Documento", "Entrada", "Salida", "Saldo"]],
-      body: movimientos.map((m, i) => {
+      body: movimientos.map((m) => {
          const entrada = m.cantidad > 0 ? m.cantidad : 0;
          const salida = m.cantidad < 0 ? Math.abs(m.cantidad) : 0;
 
