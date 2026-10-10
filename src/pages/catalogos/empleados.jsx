@@ -9,7 +9,7 @@ export default function Empleados() {
     const [empleados, setEmpleados] = useState([]);
     const [selected, setSelected] = useState([]);
     const [search, setSearch] = useState("");
-    const [filters, setFilters] = useState({});
+    const [filters] = useState({});
     const [page, setPage] = useState(1);
     const [editandoEmpleado, setEditandoEmpleado] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -109,17 +109,14 @@ export default function Empleados() {
     };
 
 
-    const handleFilterChange = (key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1);
-    };
+
 
     const totalPages = Math.ceil(filteredEmpleados.length / PAGE_SIZE);
 
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState(null);
-    const [alertVisible, setAlertVisible] = useState(true); // 👈 nuevo estado
+    const [alertVisible, setAlertVisible] = useState(true); // ðŸ‘ˆ nuevo estado
 
 
     const handleNuevo = () => {
@@ -147,7 +144,7 @@ export default function Empleados() {
                 if (res.success) {
                     setAlert({
                         type: "success",
-                        message: "¡Empleado editada exitosamente!",
+                        message: "Â¡Empleado editada exitosamente!",
                     });
 
                     setEmpleados((prev) =>
@@ -160,7 +157,7 @@ export default function Empleados() {
                 } else {
                     setAlert({
                         type: "error",
-                        message: "Ocurrió un error al editar la empleado.",
+                        message: "OcurriÃ³ un error al editar la empleado.",
                     });
                 }
             } else {
@@ -168,7 +165,7 @@ export default function Empleados() {
                 if (res.success) {
                     setAlert({
                         type: "success",
-                        message: "¡Empleado guardada exitosamente!",
+                        message: "Â¡Empleado guardada exitosamente!",
                     });
                     console.log(res.data)
                     console.log(empleados)
@@ -180,7 +177,7 @@ export default function Empleados() {
                 } else {
                     setAlert({
                         type: "error",
-                        message: "Ocurrió un error al guardar la empleado.",
+                        message: "OcurriÃ³ un error al guardar la empleado.",
                     });
                 }
             }
@@ -241,7 +238,7 @@ export default function Empleados() {
                             onClick={handleExportPDF}
                             className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded shadow hover:from-pink-600 hover:to-red-600 transition"
                         >
-                            <span className="mr-2">📄</span>
+                            <span className="mr-2">ðŸ“„</span>
                             Exportar a PDF
                         </button>
                         {selected.length > 0 && (
@@ -410,7 +407,7 @@ export default function Empleados() {
                         </tbody>
                     </table>
                 </div>
-                {/* Paginación */}
+                {/* PaginaciÃ³n */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-4">
                     <div className="text-gray-600 text-sm">
                         Mostrando {filteredEmpleados.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-

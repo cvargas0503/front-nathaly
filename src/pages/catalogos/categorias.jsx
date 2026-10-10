@@ -1,55 +1,44 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Layout from "../../components/general/layout";
 import { crearCategoria, editarCategoria, eliminarCategoria, obtenerCategorias } from "../../services/categorias";
-import { IoCheckmarkCircle, IoAlertCircle, IoPencil } from "react-icons/io5";
+import { PageShell, Pagination, EmptyState, TableLoader, SimpleModal, FormInput, PrimaryButton, EditButton } from "../../components/general/PageComponents";
+import { TbCategoryPlus } from "react-icons/tb";
+import { toast } from "react-toastify";
+
+const PAGE_SIZE = 8;
 
 export default function Categorias() {
     const [categorias, setCategorias] = useState([]);
     const [selected, setSelected] = useState([]);
     const [search, setSearch] = useState("");
-    const [filters, setFilters] = useState({});
     const [page, setPage] = useState(1);
     const [editandoCategoria, setEditandoCategoria] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [newCategoriaName, setNewCategoriaName] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    const PAGE_SIZE = 8;
-  
-    useEffect(() => {
-        fetchCategorias();
-    }, []);
+    useEffect(() => { fetchCategorias(); }, []);
 
     const fetchCategorias = async () => {
         try {
-            const res = await obtenerCategorias(); // Debe retornar { data: [...], success: true }
-            if (res.success) {
-                console.log("Categorias obtenidas:", res.data);
-                setCategorias(res.data);
-            }
-        } catch (error) {
-            setAlert({
-                type: "error",
-                message: "Error al cargar las categorias.",
-            });
-            setAlertVisible(true);
-            setTimeout(() => {
-                setAlertVisible(false);
-                setTimeout(() => setAlert(null), 500);
-            }, 3000);
+            setLoading(true);
+            const res = await obtenerCategorias();
+            if (res.success) setCategorias(res.data);
+        } catch {
+            toast.error("Error al cargar las categorías.");
+        } finally {
+            setLoading(false);
         }
     };
+
     const filteredCategorias = useMemo(() => {
-        let filtered = categorias;
-        if (search) {
-            filtered = filtered.filter((p) =>
-                Object.values(p)
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
-            );
-        }
-        
-        return filtered;
-    }, [categorias, search, filters]);
+        if (!search) return categorias;
+        return categorias.filter((p) =>
+            Object.values(p).join(" ").toLowerCase().includes(search.toLowerCase())
+        );
+    }, [categorias, search]);
 
     const paginatedCategorias = useMemo(() => {
         const start = (page - 1) * PAGE_SIZE;
@@ -73,331 +62,133 @@ export default function Categorias() {
         }
     };
 
-    const handleDeleteSelected = async() => {
+    const handleDeleteSelected = async () => {
         if (selected.length === 0) return;
         setIsDeleting(true);
-
         try {
             const res = await eliminarCategoria(selected);
-
             if (res.success) {
-                // Eliminar del estado local
                 setCategorias((prev) => prev.filter((p) => !selected.includes(p.idCategoria)));
-                setAlert({ type: "success", message: "Categorias eliminadas exitosamente." });
+                toast.success("Categorías eliminadas exitosamente.");
+                setSelected([]);
             } else {
                 throw new Error("Error inesperado");
             }
         } catch (error) {
-            setAlert({
-                type: "error",
-                message: `Error al eliminar las categorias. ${error.response?.data?.message || error.message}`,
-            });
+            toast.error(`Error al eliminar: ${error.response?.data?.message || error.message}`);
         } finally {
-            setSelected([]);
             setIsDeleting(false);
-            setAlertVisible(true);
-            setTimeout(() => {
-                setAlertVisible(false);
-                setTimeout(() => setAlert(null), 500);
-            }, 3000);
         }
     };
-    const handleExportPDF = () => {
-        alert("Funcionalidad de exportar a PDF pendiente de implementar.");
-    };
-
-
-    const handleFilterChange = (key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1);
-    };
-
-    const totalPages = Math.ceil(filteredCategorias.length / PAGE_SIZE);
-
-    const [showModal, setShowModal] = useState(false);
-    const [newCategoriaName, setNewCategoriaName] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [alert, setAlert] = useState(null);
-    const [alertVisible, setAlertVisible] = useState(true); // 👈 nuevo estado
-
 
     const handleNuevo = () => {
-        setShowModal(true);
+        setEditandoCategoria(null);
         setNewCategoriaName("");
-        setAlert(null);
+        setShowModal(true);
     };
+
     const handleEditarCategoria = (categoria) => {
         setEditandoCategoria(categoria);
         setNewCategoriaName(categoria.nombre);
         setShowModal(true);
-        setAlert(null);
     };
 
-const handleGuardarCategoria = async () => {
-    try {
+    const handleGuardarCategoria = async () => {
         if (!newCategoriaName.trim()) {
-            setAlert({ type: "error", message: "El nombre de la categoria es requerido." });
+            toast.error("El nombre de la categoría es requerido.");
             return;
         }
-
         setIsLoading(true);
-        setAlert(null);
-
-        if (editandoCategoria) {
-            // Editar categoria existente
-            console.log(editandoCategoria)
-            const res = await editarCategoria(editandoCategoria.idCategoria, { nombre: newCategoriaName });
-            if (res.success) {
-                setAlert({
-                    type: "success",
-                    message: "¡Categoria editada exitosamente!",
-                });
-
-                setCategorias((prev) =>
-                    prev.map((p) =>
-                        p.idCategoria === editandoCategoria.idCategoria ? { ...p, nombre: res.data.nombre } : p
-                    )
-                );
-
-                setShowModal(false);
-                setEditandoCategoria(null);
+        try {
+            if (editandoCategoria) {
+                const res = await editarCategoria(editandoCategoria.idCategoria, { nombre: newCategoriaName });
+                if (res.success) {
+                    setCategorias((prev) =>
+                        prev.map((p) =>
+                            p.idCategoria === editandoCategoria.idCategoria
+                                ? { ...p, nombre: res.data.nombre }
+                                : p
+                        )
+                    );
+                    toast.success("Categoría editada exitosamente.");
+                    setShowModal(false);
+                    setEditandoCategoria(null);
+                } else {
+                    toast.error("Error al editar la categoría.");
+                }
             } else {
-                setAlert({
-                    type: "error",
-                    message: "Ocurrió un error al editar la categoria.",
-                });
+                const res = await crearCategoria({ nombre: newCategoriaName });
+                if (res.success) {
+                    setCategorias((prev) => [...prev, { idCategoria: res.data.idCategoria, nombre: res.data.nombre }]);
+                    toast.success("Categoría creada exitosamente.");
+                    setShowModal(false);
+                } else {
+                    toast.error("Error al crear la categoría.");
+                }
             }
-        } else {
-            // Crear nueva categoria
-            const res = await crearCategoria({ nombre: newCategoriaName });
-            if (res.success) {
-                setAlert({
-                    type: "success",
-                    message: "¡Categoria guardada exitosamente!",
-                });
-
-                setCategorias((prev) => [
-                    ...prev,
-                    {
-                        idCategoria: res.data.idCategoria,
-                        nombre: res.data.nombre,
-                    },
-                ]);
-
-                setShowModal(false);
-            } else {
-                setAlert({
-                    type: "error",
-                    message: "Ocurrió un error al guardar la categoria.",
-                });
-            }
+        } catch (error) {
+            toast.error(`Error: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        setAlert({
-            type: "error",
-            message: `Ocurrió un error al guardar la categoria. ${
-                error.response?.data?.message || error.message
-            }`,
-        });
-    } finally {
-        setIsLoading(false);
-        setAlertVisible(true);
+    };
 
-        setTimeout(() => {
-            setAlertVisible(false);
-            setTimeout(() => setAlert(null), 500);
-        }, 3000);
-    }
-};
-
+    const totalPages = Math.ceil(filteredCategorias.length / PAGE_SIZE);
+    const allSelected =
+        paginatedCategorias.length > 0 &&
+        paginatedCategorias.every((p) => selected.includes(p.idCategoria));
 
     return (
-        <Layout usuario={"juan"}>
-            <div className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen">
-                {/* Alert */}
-               {alert && (
-                    <div
-                        className={`fixed top-6 left-1/2 z-50 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 text-lg transition-all duration-500 ease-in-out
-                            ${alertVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
-                            ${alert.type === "success"
-                                ? "bg-green-100 text-green-700 border border-green-300"
-                                : "bg-red-100 text-red-700 border border-red-300"
-                            }`}
-                    >
-                        {alert.type === "success" ? (
-                            <span className="text-2xl"><IoCheckmarkCircle /></span>
-                        ) : (
-                            <span className="text-2xl"><IoAlertCircle /></span>
-                        )}
-                        {alert.message}
-                    </div>
-                )}
-
-
-                {/* Modal */}
-                {showModal && (
-                    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
-                        <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
-                            <button
-                                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl"
-                                onClick={() => { setShowModal(false); setAlert(null); }}
-                                disabled={isLoading}
-                                aria-label="Cerrar"
-                            >
-                                ×
-                            </button>
-                            <h2 className="text-2xl font-bold mb-4 text-indigo-700">{editandoCategoria ? "Editar Categoria" : "Agregar Nueva Categoria"}</h2>
-                            <label className="block mb-2 text-gray-700 font-medium">Nombre de la categoria</label>
-                            <input
-                                type="text"
-                                className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4"
-                                placeholder="Ej: Categoria Creativa"
-                                value={newCategoriaName}
-                                onChange={(e) => setNewCategoriaName(e.target.value)}
-                                disabled={isLoading}
-                                autoFocus
-                            />
-                            {alert && alert.type === "error" && (
-                                <div className="mb-3 text-red-600 animate-shake">{alert.message}</div>
-                            )}
-                            <button
-                                onClick={handleGuardarCategoria}
-                                disabled={isLoading}
-                                className={`w-full py-2 rounded-lg font-semibold text-lg shadow transition
-                                    bg-gradient-to-r from-indigo-500 to-purple-500 text-white
-                                    hover:from-indigo-600 hover:to-purple-600
-                                    active:scale-95
-                                    ${isLoading ? "opacity-60 cursor-not-allowed" : ""}
-                                `}
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                        </svg>
-                                        Guardando...
-                                    </span>
-                                ) : (
-                                    "Guardar"
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Resto del contenido */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleNuevo}
-                            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded shadow hover:from-indigo-700 hover:to-purple-700 transition"
-                        >
-                            <span className="mr-2">+</span>
-                            Nuevo
-                        </button>
-                        <button
-                            onClick={handleExportPDF}
-                            className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded shadow hover:from-pink-600 hover:to-red-600 transition"
-                        >
-                            <span className="mr-2">📄</span>
-                            Exportar a PDF
-                        </button>
-                        {selected.length > 0 && (
-                            <button
-                                onClick={handleDeleteSelected}
-                                disabled={isDeleting}
-                                className={`bg-gradient-to-r from-red-600 to-red-400 text-white px-4 py-2 rounded shadow hover:from-red-700 hover:to-red-500 transition flex items-center gap-2 ${
-                                    isDeleting ? "opacity-70 cursor-not-allowed" : ""
-                                }`}
-                            >
-                                {isDeleting ? (
-                                    <>
-                                        <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                        </svg>
-                                        Eliminando...
-                                    </>
-                                ) : (
-                                    <>Eliminar seleccionados ({selected.length})</>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Buscar categoria..."
-                        className="w-full md:w-72 px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white shadow"
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                    />
-                </div>
-                <div className="overflow-x-auto rounded-lg shadow bg-white">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gradient-to-r from-indigo-100 to-purple-100">
+        <Layout>
+            <PageShell
+                search={search}
+                onSearchChange={(v) => { setSearch(v); setPage(1); }}
+                searchPlaceholder="Buscar categoría..."
+                onNew={handleNuevo}
+                newLabel="Nueva Categoría"
+                selectedCount={selected.length}
+                onDeleteSelected={handleDeleteSelected}
+                isDeleting={isDeleting}
+            >
+                <div className="overflow-x-auto">
+                    <table className="data-table">
+                        <thead>
                             <tr>
-                                <th className="px-3 py-2 text-left">
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            paginatedCategorias.length > 0 &&
-                                            paginatedCategorias.every((p) => selected.includes(p.idCategoria))
-                                        }
-                                        onChange={toggleSelectAll}
-                                    />
+                                <th className="w-10">
+                                    <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="rounded" />
                                 </th>
-                                <th className="px-3 py-2 text-left">Nombre
-                                    <div>
-                                        {/* <input
-                                            className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
-                                            placeholder="Filtrar"
-                                            value={filters.nombre || ""}
-                                            onChange={(e) => handleFilterChange("nombre", e.target.value)}
-                                        /> */}
-                                    </div>
-                                </th>
-                                <th className="px-3 py-2 text-left">
-                                    Acciones
-                                </th>
+                                <th>Nombre</th>
+                                <th className="text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {paginatedCategorias.length === 0 ? (
+                        <tbody>
+                            {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="text-center py-6 text-gray-400">
-                                        No hay categorias para mostrar.
+                                    <td colSpan={3}><TableLoader /></td>
+                                </tr>
+                            ) : paginatedCategorias.length === 0 ? (
+                                <tr>
+                                    <td colSpan={3}>
+                                        <EmptyState icon={TbCategoryPlus} message="No hay categorías registradas." filtered={!!search} />
                                     </td>
                                 </tr>
                             ) : (
                                 paginatedCategorias.map((p) => (
                                     <tr
                                         key={p.idCategoria}
-                                        className={
-                                            selected.includes(p.idCategoria)
-                                                ? "bg-indigo-50"
-                                                : "hover:bg-gray-50 transition"
-                                        }
+                                        style={{ background: selected.includes(p.idCategoria) ? "rgba(30,58,95,0.04)" : undefined }}
                                     >
-                                        <td className="px-3 py-2">
+                                        <td>
                                             <input
                                                 type="checkbox"
                                                 checked={selected.includes(p.idCategoria)}
                                                 onChange={() => toggleSelect(p.idCategoria)}
+                                                className="rounded"
                                             />
                                         </td>
-                                        <td className="px-3 py-2">{p.nombre}</td>
-                                        <td className="px-3 py-2">
-                                            <button
-                                                className="text-indigo-600 hover:underline font-semibold cursor-pointer" 
-                                                onClick={() => handleEditarCategoria(p)}
-                                            >
-                                                <IoPencil className="inline-block mr-1" />
-                                                Editar
-                                            </button>
+                                        <td className="font-medium" style={{ color: "var(--color-text-primary)" }}>{p.nombre}</td>
+                                        <td className="text-right">
+                                            <EditButton onClick={() => handleEditarCategoria(p)} />
                                         </td>
                                     </tr>
                                 ))
@@ -405,43 +196,49 @@ const handleGuardarCategoria = async () => {
                         </tbody>
                     </table>
                 </div>
-                {/* Paginación */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-4">
-                    <div className="text-gray-600 text-sm">
-                        Mostrando {filteredCategorias.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
-                        {Math.min(page * PAGE_SIZE, filteredCategorias.length)} de {filteredCategorias.length} Categorias
-                    </div>
-                    <div className="flex gap-2">
+
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    totalItems={filteredCategorias.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setPage}
+                />
+            </PageShell>
+
+            {/* Modal */}
+            <SimpleModal
+                open={showModal}
+                onClose={() => { setShowModal(false); setEditandoCategoria(null); }}
+                title={editandoCategoria ? "Editar Categoría" : "Nueva Categoría"}
+            >
+                <div className="space-y-4">
+                    <FormInput
+                        label="Nombre de la categoría"
+                        id="nombre-categoria"
+                        type="text"
+                        placeholder="Ej: Electrónica"
+                        value={newCategoriaName}
+                        onChange={(e) => setNewCategoriaName(e.target.value)}
+                        disabled={isLoading}
+                        autoFocus
+                        onKeyDown={(e) => e.key === "Enter" && handleGuardarCategoria()}
+                    />
+                    <div className="flex justify-end gap-3 pt-2">
                         <button
-                            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50"
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page === 1}
+                            onClick={() => { setShowModal(false); setEditandoCategoria(null); }}
+                            className="px-4 py-2 rounded-xl text-sm font-medium border transition-colors"
+                            style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+                            disabled={isLoading}
                         >
-                            Anterior
+                            Cancelar
                         </button>
-                        {Array.from({ length: totalPages }, (_, i) => (
-                            <button
-                                key={i}
-                                className={`px-3 py-1 rounded ${
-                                    page === i + 1
-                                        ? "bg-indigo-600 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-indigo-100"
-                                }`}
-                                onClick={() => setPage(i + 1)}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
-                        <button
-                            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50"
-                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages || totalPages === 0}
-                        >
-                            Siguiente
-                        </button>
+                        <PrimaryButton onClick={handleGuardarCategoria} loading={isLoading}>
+                            Guardar Categoría
+                        </PrimaryButton>
                     </div>
                 </div>
-            </div>
+            </SimpleModal>
         </Layout>
     );
 }

@@ -1,3 +1,4 @@
+import { uploadUrl } from '../../lib/apiConfig';
 import React, { useEffect, useState } from "react";
 import { obtenerDatosFormularioProducto } from "../../services/datos";
 
@@ -34,6 +35,7 @@ export default function ModalProducto({ show = true, onClose = null, onSave = nu
 
   const cargarDatosIniciales = async () => {
     const res = await obtenerDatosFormularioProducto();
+    console.log("Datos iniciales:", res);
     console.log(res)
     if (res.success) {
       setMarcas(res.data.marcas);
@@ -85,10 +87,7 @@ export default function ModalProducto({ show = true, onClose = null, onSave = nu
     onSave(form);
   };
 
-  const handleImagenes = (e) => {
-    const file = e.target.files[0];
-    setForm({ ...form, imagen: file });
-  };
+
 
   if (!show) return null;
 
@@ -127,10 +126,10 @@ export default function ModalProducto({ show = true, onClose = null, onSave = nu
             <input type="number" className={inputClass} value={form.existenciaMin} onChange={(e) => setForm({ ...form, existenciaMin: e.target.value })} />
           </div>
 
-          <div>
+          {/* <div>
             <label className="font-semibold">Existencia Max *</label>
             <input type="number" className={inputClass} value={form.existenciaMax} onChange={(e) => setForm({ ...form, existenciaMax: e.target.value })} />
-          </div>
+          </div> */}
 
           <div>
             <label className="font-semibold">Marca *</label>
@@ -222,7 +221,7 @@ export default function ModalProducto({ show = true, onClose = null, onSave = nu
               <div className="flex flex-col items-center gap-2 mt-2">
                 <div className="w-40 h-40 rounded overflow-hidden border shadow">
                   <img
-                    src={productoEditar ? `http://localhost:3000${form.imagen}` : URL.createObjectURL(form.imagen)}
+                    src={productoEditar ? uploadUrl(form.imagen) : URL.createObjectURL(form.imagen)}
                     alt="preview"
                     className="w-full h-full object-cover"
                   />
@@ -247,7 +246,7 @@ export default function ModalProducto({ show = true, onClose = null, onSave = nu
       </div>
     </div>
   );
-} 
+}
 
 
 const inputClass = "w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400";

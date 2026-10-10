@@ -7,14 +7,14 @@ export default function Proveedores() {
     const [proveedores, setProveedores] = useState([]);
     const [selected, setSelected] = useState([]);
     const [search, setSearch] = useState("");
-    const [filters, setFilters] = useState({});
+    const [filters] = useState({});
     const [page, setPage] = useState(1);
     const [editandoProveedor, setEditandoProveedor] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [errores, setErrores] = useState({});
 
     const PAGE_SIZE = 8;
-  
+
     useEffect(() => {
         fetchProveedores();
     }, []);
@@ -26,7 +26,7 @@ export default function Proveedores() {
                 console.log("Proveedores obtenidas:", res.data);
                 setProveedores(res.data);
             }
-        } catch (error) {
+        } catch {
             setAlert({
                 type: "error",
                 message: "Error al cargar las proveedores.",
@@ -48,7 +48,7 @@ export default function Proveedores() {
                     .includes(search.toLowerCase())
             );
         }
-        
+
         return filtered;
     }, [proveedores, search, filters]);
 
@@ -108,10 +108,7 @@ export default function Proveedores() {
     };
 
 
-    const handleFilterChange = (key, value) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
-        setPage(1);
-    };
+
 
     const totalPages = Math.ceil(filteredProveedores.length / PAGE_SIZE);
 
@@ -126,7 +123,7 @@ export default function Proveedores() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState(null);
-    const [alertVisible, setAlertVisible] = useState(true); // 👈 nuevo estado
+    const [alertVisible, setAlertVisible] = useState(true); // Ã°Å¸â€˜Ë† nuevo estado
 
 
     const handleNuevo = () => {
@@ -162,8 +159,8 @@ const handleGuardarProveedor = async () => {
         const camposRequeridos = {
             nombre: "El nombre del proveedor es requerido.",
             ruc: "El RUC del proveedor es obligatorio.",
-            direccion: "La dirección del proveedor es necesaria.",
-            telefono: "El teléfono del proveedor es obligatorio.",
+            direccion: "La direcciÃƒÂ³n del proveedor es necesaria.",
+            telefono: "El telÃƒÂ©fono del proveedor es obligatorio.",
         };
 
         const nuevosErrores = {};
@@ -189,7 +186,7 @@ const handleGuardarProveedor = async () => {
             if (res.success) {
                 setAlert({
                     type: "success",
-                    message: "¡Proveedor editada exitosamente!",
+                    message: "Ã‚Â¡Proveedor editada exitosamente!",
                 });
 
                 setProveedores((prev) =>
@@ -202,7 +199,7 @@ const handleGuardarProveedor = async () => {
             } else {
                 setAlert({
                     type: "error",
-                    message: "Ocurrió un error al editar la proveedor.",
+                    message: "OcurriÃƒÂ³ un error al editar la proveedor.",
                 });
             }
         } else {
@@ -210,7 +207,7 @@ const handleGuardarProveedor = async () => {
             if (res.success) {
                 setAlert({
                     type: "success",
-                    message: "¡Proveedor guardada exitosamente!",
+                    message: "Ã‚Â¡Proveedor guardada exitosamente!",
                 });
                 setProveedores((prev) => [
                     ...prev,
@@ -220,14 +217,14 @@ const handleGuardarProveedor = async () => {
             } else {
                 setAlert({
                     type: "error",
-                    message: "Ocurrió un error al guardar la proveedor.",
+                    message: "OcurriÃƒÂ³ un error al guardar la proveedor.",
                 });
             }
         }
     } catch (error) {
         setAlert({
             type: "error",
-            message: `Ocurrió un error al guardar la proveedor. ${
+            message: `OcurriÃƒÂ³ un error al guardar la proveedor. ${
                 error.response?.data?.message || error.message
             }`,
         });
@@ -276,16 +273,16 @@ const handleGuardarProveedor = async () => {
                                 disabled={isLoading}
                                 aria-label="Cerrar"
                             >
-                                ×
+                                Ãƒâ€”
                             </button>
                             <h2 className="text-2xl font-bold mb-4 text-indigo-700">{editandoProveedor ? "Editar Proveedor" : "Agregar Nueva Proveedor"}</h2>
                             <div className="space-y-3 pb-6">
                                {[
                                     { label: "Nombre", key: "nombre" },
-                                    { label: "Razón Social", key: "razonSocial" },
+                                    { label: "RazÃƒÂ³n Social", key: "razonSocial" },
                                     { label: "RUC", key: "ruc" },
-                                    { label: "Dirección", key: "direccion" },
-                                    { label: "Teléfono", key: "telefono" },
+                                    { label: "DirecciÃƒÂ³n", key: "direccion" },
+                                    { label: "TelÃƒÂ©fono", key: "telefono" },
                                     { label: "Correo", key: "email" },
                                 ].map(({ label, key }) => (
                                     <div key={key}>
@@ -360,7 +357,7 @@ const handleGuardarProveedor = async () => {
                             onClick={handleExportPDF}
                             className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded shadow hover:from-pink-600 hover:to-red-600 transition"
                         >
-                            <span className="mr-2">📄</span>
+                            <span className="mr-2">Ã°Å¸â€œâ€ž</span>
                             Exportar a PDF
                         </button>
                         {selected.length > 0 && (
@@ -420,7 +417,7 @@ const handleGuardarProveedor = async () => {
                                         /> */}
                                     </div>
                                 </th>
-                                <th className="px-3 py-2 text-left">Razón Social
+                                <th className="px-3 py-2 text-left">RazÃƒÂ³n Social
                                     <div>
                                         {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
@@ -450,7 +447,7 @@ const handleGuardarProveedor = async () => {
                                         /> */}
                                     </div>
                                 </th>
-                                <th className="px-3 py-2 text-left">Télefono
+                                <th className="px-3 py-2 text-left">TÃƒÂ©lefono
                                     <div>
                                         {/* <input
                                             className="w-full mt-1 px-2 py-1 rounded border border-gray-200 text-sm"
@@ -507,7 +504,7 @@ const handleGuardarProveedor = async () => {
                                         <td className="px-3 py-2">{p.email}</td>
                                         <td className="px-3 py-2">
                                             <button
-                                                className="text-indigo-600 hover:underline font-semibold cursor-pointer" 
+                                                className="text-indigo-600 hover:underline font-semibold cursor-pointer"
                                                 onClick={() => handleEditarProveedor(p)}
                                             >
                                                 <IoPencil className="inline-block mr-1" />
@@ -520,7 +517,7 @@ const handleGuardarProveedor = async () => {
                         </tbody>
                     </table>
                 </div>
-                {/* Paginación */}
+                {/* PaginaciÃƒÂ³n */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-6 gap-4">
                     <div className="text-gray-600 text-sm">
                         Mostrando {filteredProveedores.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
