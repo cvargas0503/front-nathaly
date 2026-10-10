@@ -1,3 +1,4 @@
+import { uploadUrl } from '../../lib/apiConfig';
 import React, { useEffect, useState } from "react";
 import Layout from "../../components/general/layout";
 import { SucursalForm } from "../../components/catalogos/FormularioSucursal";
@@ -87,7 +88,7 @@ export default function SucursalesPage() {
         setSucursalSeleccionada(factura);
         setMostrarDialogoAnular(true);
       };
-    
+
       const handleEliminarSucursal = async() => {
         try
         {
@@ -149,7 +150,7 @@ export default function SucursalesPage() {
                                     className="bg-white rounded-xl shadow-lg p-6 flex gap-6 items-center hover:shadow-2xl transition"
                                 >
                                     <img
-                                        src={branch.logo ? `http://localhost:3000${branch.logo}` : "https://placehold.co/80x80?text=Logo"}
+                                        src={branch.logo ? uploadUrl(branch.logo) : "https://placehold.co/80x80?text=Logo"}
                                         alt={branch.nombre || "Sucursal"}
                                         className="w-20 h-20 rounded-lg object-cover border border-gray-200 shadow"
                                     />

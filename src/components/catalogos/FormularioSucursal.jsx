@@ -1,3 +1,4 @@
+import { uploadUrl } from '../../lib/apiConfig';
 import { useEffect, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
 
@@ -129,7 +130,7 @@ export function SucursalForm({ open, onClose, onSave, initialData, ciudades = []
                                 <img src={
                                     form.logo?.startsWith("blob:") || form.logo?.startsWith("http")
                                         ? form.logo
-                                        : `http://localhost:3000${form.logo}`
+                                        : uploadUrl(form.logo)
                                 }
                                     alt="Logo" className="w-full h-full object-contain" />
                                 <button
