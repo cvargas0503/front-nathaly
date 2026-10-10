@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { BadgeDollarSign, Search } from "lucide-react";
-import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { IoSearchOutline } from "react-icons/io5";
+import { HiOutlineClipboardList, HiOutlineEye } from "react-icons/hi";
 import Layout from "../../components/general/layout";
 import { toast } from "react-toastify";
 import { obtenerMovimientosAPI } from "../../services/caja";
@@ -10,161 +10,151 @@ export default function MovimientoCaja() {
   const [movimientos, setMovimientos] = useState([]);
   const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
+  const [detalle, setDetalle] = useState(null);
 
-  useEffect(() => {
-    fetchMovimientos();
-  }, []);
-
-  
+  useEffect(() => { fetchMovimientos(); }, []);
 
   const fetchMovimientos = async () => {
     try {
       setLoading(true);
-      const respuesta = await obtenerMovimientosAPI();
-      if (!respuesta.success) {
-        toast.error(respuesta.message || "Error al cargar los movimientos");
-        return;
-      }
-      setMovimientos(respuesta.data);
+      const res = await obtenerMovimientosAPI();
+      if (res.success) setMovimientos(res.data);
+      else toast.error("Error al cargar los movimientos.");
+    } catch { toast.error("Error al cargar los movimientos."); }
+    finally { setLoading(false); }
+  };
 
-    }catch (error) {
-      console.error("Error al cargar los movimientos:", error);
-      toast.error("Error al cargar los movimientos. Por favor, intente nuevamente.");
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  const filtrar = movimientos.filter(m =>
-    m.movimiento.toLowerCase().includes(filtro.toLowerCase()) ||
+  const filtrar = movimientos.filter((m) =>
+    m.movimiento?.toLowerCase().includes(filtro.toLowerCase()) ||
     (m.documento || "").toLowerCase().includes(filtro.toLowerCase()) ||
     (m.cliente || "").toLowerCase().includes(filtro.toLowerCase()) ||
     (m.empleado || "").toLowerCase().includes(filtro.toLowerCase())
   );
 
-  const totalIngresosC = filtrar.reduce((sum, m) => {
-    if (m.tipo === "Venta" || m.tipo === "Ingreso") return sum + m.pagos.filter(p => p.moneda === "C$").reduce((s,p)=>s+p.monto,0);
-    return sum;
-  }, 0);
+  const totalIngC = filtrar.reduce((s, m) => (m.tipo === "Venta" || m.tipo === "Ingreso") ? s + m.pagos.filter((p) => p.moneda === "C$").reduce((a, p) => a + p.monto, 0) : s, 0);
+  const totalIngD = filtrar.reduce((s, m) => (m.tipo === "Venta" || m.tipo === "Ingreso") ? s + m.pagos.filter((p) => p.moneda === "$").reduce((a, p) => a + p.monto, 0) : s, 0);
+  const totalEgrC = filtrar.reduce((s, m) => m.tipo === "Egreso" ? s + m.pagos.filter((p) => p.moneda === "C$").reduce((a, p) => a + p.monto, 0) : s, 0);
+  const totalEgrD = filtrar.reduce((s, m) => m.tipo === "Egreso" ? s + m.pagos.filter((p) => p.moneda === "$").reduce((a, p) => a + p.monto, 0) : s, 0);
 
-  const totalIngresosD = filtrar.reduce((sum, m) => {
-    if (m.tipo === "Venta" || MovimientoCaja.tipo === "Ingreso") return sum + m.pagos.filter(p => p.moneda === "$").reduce((s,p)=>s+p.monto,0);
-    return sum;
-  }, 0);
-
-  const totalEgresosC = filtrar.reduce((sum, m) => m.tipo === "Egreso" ? sum + m.pagos.filter(p => p.moneda === "C$").reduce((s,p)=>s+p.monto,0) : sum, 0);
-  const totalEgresosD = filtrar.reduce((sum, m) => m.tipo === "Egreso" ? sum + m.pagos.filter(p => p.moneda === "$").reduce((s,p)=>s+p.monto,0) : sum, 0);
-
-  const verDetalle = (m) => {
-    if (m.tipo === "Venta") {
-      const lista = m.pagos.map(p => `
-        <div style="background:#f1f5f9; margin:8px 0; padding:8px 12px; border-left:4px solid #2563eb; border-radius:6px">
-          <b>${p.metodo}</b> - ${p.monto} ${p.moneda}
-          ${p.referencia ? `<div style="font-size:13px">Referencia: <em>${p.referencia}</em></div>` : ""}
-        </div>
-      `).join("");
-
-      const totalC = m.pagos.filter(p=>p.moneda==="C$").reduce((s,p)=>s+p.monto,0);
-      const totalD = m.pagos.filter(p=>p.moneda==="$").reduce((s,p)=>s+p.monto,0);
-
-      Swal.fire({
-        title: `<h3 style='color:#1e3a8a'>💵 Detalle de Pagos - ${m.documento}</h3>`,
-        html: `${lista}
-          <hr style="margin:10px 0"/>
-          <div style="text-align:center; font-size:15px; color:#1e3a8a">
-            <b>Total C$:</b> ${totalC} <br/>
-            <b>Total $:</b> ${totalD}
-          </div>
-        `,
-        confirmButtonText: "Cerrar",
-        customClass: { popup: 'rounded-xl p-5' }
-      });
-    }
-
-    if (m.tipo === "Ingreso" || m.tipo === "Egreso") {
-      Swal.fire({
-        title: `<h3 style='color:#1e3a8a'>${m.tipo} de Caja - ${m.documento}</h3>`,
-        html: `
-          <div style='text-align:left; font-size:15px'>
-            <b>Empleado:</b> ${m.empleado}<br/>
-            <b>Fecha:</b> ${m.fecha}<br/>
-            <b>Motivo:</b> ${m.motivo}<br/>
-            <b>Observación:</b> ${m.observacion}<br/>
-            <hr/>
-            <b>Total C$:</b> ${m.montoCordoba} <br/>
-            <b>Total $:</b> ${m.montoDolar}
-          </div>
-        `,
-        confirmButtonText: "Cerrar",
-        customClass: { popup: 'rounded-xl p-5' }
-      });
-    }
+  const tipoBadge = (t) => {
+    if (t === "Venta") return "badge-success";
+    if (t === "Ingreso") return "badge-info";
+    if (t === "Egreso") return "badge-error";
+    return "badge-warning";
   };
+
+  const calcIngC = (m) => (m.tipo === "Venta" || m.tipo === "Ingreso") ? m.pagos.filter((p) => p.moneda === "C$").reduce((s, p) => s + p.monto, 0) : 0;
+  const calcIngD = (m) => (m.tipo === "Venta" || m.tipo === "Ingreso") ? m.pagos.filter((p) => p.moneda === "$").reduce((s, p) => s + p.monto, 0) : 0;
+  const calcEgrC = (m) => m.tipo === "Egreso" ? m.pagos.filter((p) => p.moneda === "C$").reduce((s, p) => s + p.monto, 0) : 0;
+  const calcEgrD = (m) => m.tipo === "Egreso" ? m.pagos.filter((p) => p.moneda === "$").reduce((s, p) => s + p.monto, 0) : 0;
 
   return (
     <Layout>
-    <div className="max-w-6xl mx-auto mt-10 bg-white rounded-xl shadow-xl p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-blue-700 mb-4 flex items-center gap-2">
-        <BadgeDollarSign /> Movimientos de Caja
-      </h1>
+      <div className="p-6 md:p-8 animate-fade-in-up">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {[
+            { label: "Ingresos C$", val: `C$ ${totalIngC.toFixed(2)}`, color: "#10b981", bg: "rgba(16,185,129,0.08)" },
+            { label: "Ingresos $", val: `$ ${totalIngD.toFixed(2)}`, color: "#10b981", bg: "rgba(16,185,129,0.08)" },
+            { label: "Egresos C$", val: `C$ ${totalEgrC.toFixed(2)}`, color: "#ef4444", bg: "rgba(239,68,68,0.08)" },
+            { label: "Egresos $", val: `$ ${totalEgrD.toFixed(2)}`, color: "#ef4444", bg: "rgba(239,68,68,0.08)" },
+          ].map((c, i) => (
+            <div key={i} className="rounded-2xl p-4 border" style={{ background: "white", borderColor: "var(--color-border)" }}>
+              <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>{c.label}</p>
+              <p className="text-lg font-bold" style={{ color: c.color }}>{c.val}</p>
+            </div>
+          ))}
+        </div>
 
-      <div className="flex gap-4 mb-4">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Buscar movimiento, documento, cliente o empleado"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-            className="border rounded px-4 py-2 w-full text-center focus:ring-2 focus:ring-blue-300"
-          />
-          <Search className="absolute right-3 top-3 text-blue-500" size={18} />
+        {/* Search */}
+        <div className="relative mb-4">
+          <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--color-text-muted)" }} />
+          <input type="text" placeholder="Buscar movimiento, documento, cliente..." value={filtro} onChange={(e) => setFiltro(e.target.value)}
+            className="pl-9 pr-4 py-2.5 rounded-xl text-sm w-full sm:w-72 focus:outline-none transition-all"
+            style={{ border: "1.5px solid var(--color-border)", background: "white" }} />
+        </div>
+
+        {/* Table */}
+        <div className="rounded-2xl overflow-hidden border" style={{ background: "white", borderColor: "var(--color-border)", boxShadow: "var(--shadow-sm)" }}>
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead><tr><th>Tipo</th><th>N° Mov</th><th>Doc</th><th>Empleado</th><th>Cliente</th><th>Fecha</th><th>Ing C$</th><th>Ing $</th><th>Egr C$</th><th>Egr $</th><th className="text-right">Ver</th></tr></thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={11} className="py-16 text-center"><span className="text-sm" style={{ color: "var(--color-text-muted)" }}>Cargando...</span></td></tr>
+                ) : filtrar.length === 0 ? (
+                  <tr><td colSpan={11} className="py-16 text-center">
+                    <HiOutlineClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" style={{ color: "var(--color-text-muted)" }} />
+                    <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Sin movimientos.</p>
+                  </td></tr>
+                ) : filtrar.map((m) => (
+                  <tr key={m.id}>
+                    <td><span className={`badge ${tipoBadge(m.tipo)}`}>{m.tipo}</span></td>
+                    <td>{m.movimiento}</td><td>{m.documento}</td><td>{m.empleado}</td>
+                    <td>{m.cliente || "—"}</td><td style={{ color: "var(--color-text-secondary)" }}>{m.fecha}</td>
+                    <td>{calcIngC(m).toFixed(2)}</td><td>{calcIngD(m).toFixed(2)}</td>
+                    <td>{calcEgrC(m).toFixed(2)}</td><td>{calcEgrD(m).toFixed(2)}</td>
+                    <td className="text-right">
+                      <button onClick={() => setDetalle(m)} className="p-2 rounded-lg transition-colors" style={{ color: "var(--brand-primary-light)" }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(42,82,152,0.08)"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+                        <HiOutlineEye className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {filtrar.length > 0 && (
+                <tfoot>
+                  <tr style={{ background: "var(--color-surface-2)" }}>
+                    <td colSpan={6} className="text-right font-semibold">Totales:</td>
+                    <td className="font-bold" style={{ color: "#10b981" }}>{totalIngC.toFixed(2)}</td>
+                    <td className="font-bold" style={{ color: "#10b981" }}>{totalIngD.toFixed(2)}</td>
+                    <td className="font-bold" style={{ color: "#ef4444" }}>{totalEgrC.toFixed(2)}</td>
+                    <td className="font-bold" style={{ color: "#ef4444" }}>{totalEgrD.toFixed(2)}</td>
+                    <td></td>
+                  </tr>
+                  <tr style={{ background: "var(--color-surface-2)" }}>
+                    <td colSpan={6} className="text-right font-semibold">Saldo Neto:</td>
+                    <td colSpan={2} className="font-bold" style={{ color: "var(--color-success)" }}>C$ {(totalIngC - totalEgrC).toFixed(2)}</td>
+                    <td colSpan={2} className="font-bold" style={{ color: "var(--color-success)" }}>$ {(totalIngD - totalEgrD).toFixed(2)}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
         </div>
       </div>
 
-      <table className="w-full border text-center mt-6">
-        <thead className="bg-blue-100">
-          <tr>
-            <th>Tipo</th><th>N° Mov</th><th>Doc</th><th>Empleado</th><th>Cliente</th><th>Fecha</th>
-            <th>Ingreso C$</th><th>Ingreso $</th><th>Egreso C$</th><th>Egreso $</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtrar.map(m => (
-            <tr key={m.id} className="border-t hover:bg-blue-50" onContextMenu={(e) => { e.preventDefault(); verDetalle(m); }}>
-              <td>{m.tipo}</td>
-              <td>{m.movimiento}</td>
-              <td>{m.documento}</td>
-              <td>{m.empleado}</td>
-              <td>{m.cliente || "-"}</td>
-              <td>{m.fecha}</td>
-              <td>
-                {m.tipo==="Venta" || m.tipo === "Ingreso" ? m.pagos.filter(p=>p.moneda==="C$").reduce((s,p)=>s+p.monto,0) :
-                 0} C$
-              </td>
-              <td>
-                {m.tipo==="Venta" || m.tipo === "Ingreso" ? m.pagos.filter(p=>p.moneda==="$").reduce((s,p)=>s+p.monto,0) : 0} $
-              </td>
-              <td>{m.tipo==="Egreso" ? m.pagos.filter(p=>p.moneda==="C$").reduce((s,p)=>s+p.monto,0) : 0} C$</td>
-              <td>{m.tipo==="Egreso" ? m.pagos.filter(p=>p.moneda==="$").reduce((s,p)=>s+p.monto,0) : 0} $</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot className="bg-blue-50 font-bold">
-          <tr>
-            <td colSpan="6" className="text-right p-2">Total:</td>
-            <td>{totalIngresosC} C$</td>
-            <td>{totalIngresosD} $</td>
-            <td>{totalEgresosC} C$</td>
-            <td>{totalEgresosD} $</td>
-          </tr>
-          <tr>
-            <td colSpan="6" className="text-right p-2">Saldo Neto:</td>
-            <td colSpan="2" className="text-green-700">{(totalIngresosC - totalEgresosC).toFixed(2)} C$</td>
-            <td colSpan="2" className="text-green-700">{(totalIngresosD - totalEgresosD).toFixed(2)} $</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+      {/* Detail Modal */}
+      <Dialog open={!!detalle} onOpenChange={() => setDetalle(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Detalle — {detalle?.documento}</DialogTitle></DialogHeader>
+          {detalle && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <div><span style={{ color: "var(--color-text-muted)" }}>Tipo:</span> <span className={`badge ${tipoBadge(detalle.tipo)}`}>{detalle.tipo}</span></div>
+                <div><span style={{ color: "var(--color-text-muted)" }}>Fecha:</span> {detalle.fecha}</div>
+                <div><span style={{ color: "var(--color-text-muted)" }}>Empleado:</span> {detalle.empleado}</div>
+                {detalle.cliente && <div><span style={{ color: "var(--color-text-muted)" }}>Cliente:</span> {detalle.cliente}</div>}
+              </div>
+              {detalle.motivo && <div className="p-3 rounded-xl" style={{ background: "var(--color-surface-2)" }}><span style={{ color: "var(--color-text-muted)" }}>Motivo:</span> {detalle.motivo}</div>}
+              {detalle.pagos?.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-semibold">Pagos:</p>
+                  {detalle.pagos.map((p, i) => (
+                    <div key={i} className="p-3 rounded-xl border-l-4 flex justify-between" style={{ background: "var(--color-surface-2)", borderColor: "var(--brand-primary)" }}>
+                      <span className="font-medium">{p.metodo}</span>
+                      <span>{p.monto} {p.moneda} {p.referencia ? <span className="text-xs ml-1" style={{ color: "var(--color-text-muted)" }}>Ref: {p.referencia}</span> : ""}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
