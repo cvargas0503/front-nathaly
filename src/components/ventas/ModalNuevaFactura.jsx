@@ -9,7 +9,7 @@ import { IoTrashOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import { NuevaVenta } from "../../services/venta";
-const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, facturas, setFacturas }) => {
+const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFacturas }) => {
     const [clientes, setClientes] = useState([]);
     const [sucursales, setSucursales] = useState([]);
     const [empleados, setEmpleados] = useState([]);
@@ -86,7 +86,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, factur
             return false;
         }
         if (!form.idTermino) {
-            toast.error("Seleccione un término de pago.");
+            toast.error("Seleccione un tÃ©rmino de pago.");
             return false;
         }
         if (!form.idSucursal) {
@@ -111,7 +111,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, factur
                 return false;
             }
             if (!item.precio || item.precio < 0) {
-                toast.error("El precio de cada producto debe ser válido.");
+                toast.error("El precio de cada producto debe ser vÃ¡lido.");
                 return false;
             }
         }
@@ -131,65 +131,90 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, factur
                 }))
             };
             const res = await NuevaVenta(venta);
-            console.log(res);   
             if (res.success) {
-
                 toast.success("Factura guardada exitosamente.");
                 setFacturas(prev => [...prev, res.data]);
                 limpiarFormulario();
             } else {
-                console.log("Error al guardar la factura:", res);   
                 toast.error(res.message || "Error al guardar la factura.");
             }
         } catch (error) {
-            console.error("Error al guardar la factura:", error);
-            toast.error(error.response?.data?.message ?? "Ocurrió un error inesperado.");
+            toast.error(error.response?.data?.message ?? "OcurriÃ³ un error inesperado.");
         } finally {
             setCargando(false);
         }
     };
-    return (
-        <Dialog open={mostrarNuevaFactura} onOpenChange={() => limpiarFormulario()}>
-            <Loader2 className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${cargando ? "block" : "hidden"}`} />
 
-            <DialogContent className="w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto px-4 sm:px-8 py-8">
+    const handleOnOpenChange = (open) => {
+        if (!open && detalle.length > 0) {
+            if (!confirm("Tiene productos agregados. Â¿Desea descartar los cambios?")) return;
+        }
+        if (!open) limpiarFormulario();
+    };
+
+    return (
+        <Dialog open={mostrarNuevaFactura} onOpenChange={handleOnOpenChange}>
+            {cargando && <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm rounded-2xl"><Loader2 className="w-10 h-10 animate-spin text-blue-600" /></div>}
+
+            <DialogContent className="w-full max-w-5xl max-h-[95vh] overflow-auto p-8 border-none shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-3xl font-bold mb-4">Nueva Factura</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <div className="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+                        Nueva Factura
+                    </DialogTitle>
                 </DialogHeader>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-3">
-                    <select value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: parseInt(e.target.value, 10) })} className="border rounded p-3 w-full">
-                        <option value={0}>Seleccionar Cliente</option>
-                        {clientes.map((cliente) => (
-                            <option key={cliente.idCliente} value={cliente.idCliente}>{cliente.nombreCompleto}</option>
-                        ))}
-                    </select>
-                    <select value={form.idTermino} onChange={(e) => setForm({ ...form, idTermino: parseInt(e.target.value, 10) })} className="border rounded p-3 w-full">
-                        <option value={0}>Seleccionar Término</option>
-                        {terminosPago.map((termino) => (
-                            <option key={termino.idTermino} value={termino.idTermino}>{termino.codigo} ({termino.diasPlazo})</option>
-                        ))}
-
-                    </select>
-                    <select value={form.idSucursal} onChange={(e) => setForm({ ...form, idSucursal: parseInt(e.target.value, 10) })} className="border rounded p-3 w-full">
-                        <option value={0}>Seleccionar Sucursal</option>
-                        {sucursales.map((sucursal) => (
-                            <option key={sucursal.idSucursal} value={sucursal.idSucursal}>{sucursal.nombre}</option>
-                        ))}
-                    </select>
-                    <select value={form.idEmpleado} onChange={(e) => setForm({ ...form, idEmpleado: parseInt(e.target.value, 10) })} className="border rounded p-3 w-full">
-                        <option value={0}>Seleccionar Empleado</option>
-                        {empleados.map((empleado) => (
-                            <option key={empleado.idEmpleado} value={empleado.idEmpleado}>{empleado.nombreCompleto}</option>
-                        ))}
-
-                    </select>
-                    <Input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="w-full" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Cliente</label>
+                        <select value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: parseInt(e.target.value, 10) })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
+                            <option value={0}>Seleccionar Cliente</option>
+                            {clientes.map((cliente) => (
+                                <option key={cliente.idCliente} value={cliente.idCliente}>{cliente.nombreCompleto}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">TÃ©rmino de Pago</label>
+                        <select value={form.idTermino} onChange={(e) => setForm({ ...form, idTermino: parseInt(e.target.value, 10) })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
+                            <option value={0}>Seleccionar TÃ©rmino</option>
+                            {terminosPago.map((termino) => (
+                                <option key={termino.idTermino} value={termino.idTermino}>{termino.codigo} ({termino.diasPlazo} dÃ­as)</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Sucursal</label>
+                        <select value={form.idSucursal} onChange={(e) => setForm({ ...form, idSucursal: parseInt(e.target.value, 10) })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
+                            <option value={0}>Seleccionar Sucursal</option>
+                            {sucursales.map((sucursal) => (
+                                <option key={sucursal.idSucursal} value={sucursal.idSucursal}>{sucursal.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Empleado</label>
+                        <select value={form.idEmpleado} onChange={(e) => setForm({ ...form, idEmpleado: parseInt(e.target.value, 10) })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
+                            <option value={0}>Seleccionar Empleado</option>
+                            {empleados.map((empleado) => (
+                                <option key={empleado.idEmpleado} value={empleado.idEmpleado}>{empleado.nombreCompleto}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Fecha</label>
+                        <Input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="rounded-xl border-slate-200 focus:ring-blue-500/20" />
+                    </div>
                 </div>
 
-                <div className="mt-10 text-right">
-                    <Button onClick={() => setMostrarSelectorProducto(true)} className="bg-primary text-white">
-                        Agregar Producto
+                <div className="mt-8 flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-slate-600 text-sm font-medium">Gestionar los productos de la factura</p>
+                    <Button onClick={() => setMostrarSelectorProducto(true)} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6">
+                        + Agregar Producto
                     </Button>
                 </div>
 

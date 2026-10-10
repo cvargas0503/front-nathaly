@@ -3,7 +3,7 @@ export default function VentaCarta({ venta, modoImpresion = false }) {
     return <p className="text-red-500">Datos de la venta no disponibles.</p>;
   }
 
-  console.log("Datos de la venta:", venta);
+
 
   return (
     <div className={`w-full ${modoImpresion ? "" : "p-6 bg-gray-100 flex justify-center"}`}>

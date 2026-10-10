@@ -1,78 +1,125 @@
 import React from "react";
-import html2pdf from "html2pdf.js";
 
-export default function VentaTermica({ venta }) {
-  const handlePrint = () => {
-    window.print();
-  };
+export default function VentaTermica({ venta, modoPreview = false }) {
+  if (!venta || typeof venta !== "object") {
+    return <p className="text-red-500">Datos de la venta no disponibles.</p>;
+  }
 
-  const handleExportPDF = () => {
-    const element = document.getElementById("reporte-venta");
-    const opt = {
-      margin: 0.2,
-      filename: `venta_${venta.numero}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "mm", format: "a5", orientation: "portrait" },
-    };
+  // Map fields - the component supports both field naming conventions
+  const numero = venta.numeroVenta || venta.numero || "N/A";
+  const fecha = venta.fecha || "N/A";
+  const cliente = venta.cliente || "N/A";
+  const empleado = venta.empleado || "";
+  const metodoPago = venta.metodoPago || venta.termino || "";
+  const observacion = venta.observacion || "";
+  const detalles = Array.isArray(venta.detalles) ? venta.detalles : [];
+  const total = venta.total != null ? Number(venta.total).toFixed(2) : "0.00";
 
-    html2pdf().set(opt).from(element).save();
-  };
+  const ticketContent = (
+    <div
+      style={{
+        width: "280px",
+        background: "white",
+        padding: "16px",
+        fontFamily: "'Courier New', monospace",
+        fontSize: "12px",
+        border: modoPreview ? "1px dashed #bbb" : "none",
+        borderRadius: modoPreview ? "8px" : "0",
+      }}
+    >
+      <h2
+        style={{
+          textAlign: "center",
+          fontWeight: "bold",
+          fontSize: "14px",
+          margin: "0 0 4px 0",
+        }}
+      >
+        TIENDA NATHALY
+      </h2>
+      <p style={{ textAlign: "center", fontSize: "11px", margin: "0 0 8px 0" }}>
+        Factura N° {numero}
+      </p>
+      <p style={{ fontSize: "11px", margin: "2px 0" }}>Fecha: {fecha}</p>
+      <p style={{ fontSize: "11px", margin: "2px 0" }}>Cliente: {cliente}</p>
+      {empleado && (
+        <p style={{ fontSize: "11px", margin: "2px 0" }}>Vendedor: {empleado}</p>
+      )}
+      {metodoPago && (
+        <p style={{ fontSize: "11px", margin: "2px 0" }}>Pago: {metodoPago}</p>
+      )}
 
+      <hr style={{ border: "none", borderTop: "1px dashed #000", margin: "8px 0" }} />
+
+      {detalles.map((item, index) => (
+        <div
+          key={index}
+          className="detalle-item"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: "11px",
+            marginBottom: "2px",
+          }}
+        >
+          <span style={{ maxWidth: "60%", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {item.descripcion || item.referencia || "Producto"}
+          </span>
+          <span>
+            {item.cantidad} x C${(item.precioUnitario || item.precio || 0).toFixed(2)}
+          </span>
+        </div>
+      ))}
+
+      <hr style={{ border: "none", borderTop: "1px dashed #000", margin: "8px 0" }} />
+
+      <div
+        className="total"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontWeight: "bold",
+          fontSize: "13px",
+        }}
+      >
+        <span>Total:</span>
+        <span>C$ {total}</span>
+      </div>
+
+      {observacion && (
+        <p style={{ fontSize: "11px", marginTop: "8px" }}>Nota: {observacion}</p>
+      )}
+
+      <p
+        className="footer"
+        style={{ textAlign: "center", marginTop: "12px", fontSize: "11px" }}
+      >
+        ¡Gracias por su compra!
+      </p>
+    </div>
+  );
+
+  // If in preview mode (embedded inside a Dialog), just render the ticket content
+  if (modoPreview) {
+    return ticketContent;
+  }
+
+  // Standalone page mode (legacy support)
   return (
     <div className="w-screen h-screen bg-gray-200 flex items-center justify-center">
       <div className="flex flex-col items-center space-y-6">
-        {/* CONTENIDO DEL TICKET */}
-        <div
-          id="reporte-venta"
-          className="w-[300px] bg-white p-4 text-sm font-mono shadow-xl border border-gray-400 rounded-lg"
-        >
-          <h2 className="text-center font-bold text-base">TIENDA NATHALY</h2>
-          <p className="text-center text-xs mb-2">Factura N° {venta.numero}</p>
-          <p className="text-[11px]">Fecha: {venta.fecha}</p>
-          <p className="text-[11px]">Cliente: {venta.cliente}</p>
-          {venta.metodoPago && (
-            <p className="text-[11px]">Pago: {venta.metodoPago}</p>
-          )}
+        <div id="reporte-venta">{ticketContent}</div>
 
-          <hr className="my-2 border-gray-400" />
-
-          {venta.detalles.map((item, index) => (
-            <div key={index} className="flex justify-between text-[11px]">
-              <span>{item.descripcion}</span>
-              <span>
-                {item.cantidad} x {item.precio}
-              </span>
-            </div>
-          ))}
-
-          <hr className="my-2 border-gray-400" />
-
-          <div className="flex justify-between text-[12px] font-bold">
-            <span>Total:</span>
-            <span>C$ {venta.total}</span>
-          </div>
-
-          {venta.observacion && (
-            <p className="text-[11px] mt-2">Nota: {venta.observacion}</p>
-          )}
-
-          <p className="text-center mt-3 text-[11px]">¡Gracias por su compra!</p>
-        </div>
-
-        {/* BOTONES */}
         <div className="flex gap-4 print:hidden">
           <button
-            onClick={handlePrint}
-            className="bg-black text-black-400 px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-yellow-500 hover:text-black transition duration-200"
+            onClick={() => window.print()}
+            className="px-5 py-2 rounded-lg font-semibold shadow-md transition duration-200"
+            style={{
+              background: "linear-gradient(135deg, #1e3a5f, #2a5298)",
+              color: "white",
+            }}
           >
             🖨️ Imprimir
-          </button>
-          <button
-            onClick={handleExportPDF}
-            className="bg-red-600 text-black-400 px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 transition duration-200"
-          >
-            📄 Exportar PDF
           </button>
         </div>
       </div>

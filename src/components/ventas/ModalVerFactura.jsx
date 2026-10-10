@@ -2,38 +2,39 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-const ModalVerFactura = ({factura, setMostrarFactura }) => {
 
-// Separar el string en día, mes y año
-    const [dia, mes, anio] = factura.fecha?.split("-").map(Number);
-    console.log(factura.fecha, dia, mes, anio, typeof factura.fecha);
+const ModalVerFactura = ({ factura, setMostrarFactura }) => {
+    const [dia, mes, anio] = (factura?.fecha?.split("-") ?? []).map(Number);
 
-    // Crear el objeto Date (mes en JavaScript va de 0 a 11)
-// Formatear la fecha como YYYY-MM-DD
     const fechaFormateada = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+    const InfoField = ({ label, value }) => (
+        <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</label>
+            <div className="px-3 py-2.5 rounded-xl border bg-slate-50 text-sm font-medium text-slate-700 border-slate-200">
+                {value || "—"}
+            </div>
+        </div>
+    );
+
     return (
         <Dialog open={factura !== null} onOpenChange={() => setMostrarFactura(null)}>
-            {/* <Loader2 className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${cargando ? "block" : "hidden"}`} /> */}
-
-            <DialogContent className="w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto px-4 sm:px-8 py-8">
+            <DialogContent className="w-full max-w-5xl max-h-[95vh] overflow-auto p-8">
                 <DialogHeader>
-                    <DialogTitle className="text-3xl font-bold mb-4">Factura No: {factura.numeroVenta}</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold text-slate-800">
+                        Factura <span className="text-blue-600">#{factura.numeroVenta}</span>
+                    </DialogTitle>
                 </DialogHeader>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-3">
-                    <select value={factura.cliente} className="border rounded p-3 w-full" disabled>
-                        <option>{factura.cliente}</option>
-                    </select>
-                    <select value={factura.termino} className="border rounded p-3 w-full" disabled>
-                        <option value={factura.termino}>{factura.termino}</option>
-                    </select>
-                    <select value={factura.sucursal} className="border rounded p-3 w-full" disabled>
-                        <option value={factura.sucursal}>{factura.sucursal}</option>
-                    </select>
-                    <select value={factura.empleado} className="border rounded p-3 w-full" disabled>
-                        <option value={factura.empleado}>{factura.empleado}</option>
-                    </select>
-                    <Input type="date" value={fechaFormateada} className="w-full" disabled/>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    <InfoField label="Cliente" value={factura.cliente} />
+                    <InfoField label="Término de Pago" value={factura.termino} />
+                    <InfoField label="Sucursal" value={factura.sucursal} />
+                    <InfoField label="Empleado" value={factura.empleado} />
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Fecha</label>
+                        <Input type="date" value={fechaFormateada} className="rounded-xl bg-slate-50 border-slate-200" disabled />
+                    </div>
                 </div>
 
                 <Table>
@@ -54,7 +55,7 @@ const ModalVerFactura = ({factura, setMostrarFactura }) => {
                                     <Input type="number" min="1" value={item.cantidad} disabled/>
                                 </TableCell>
                                 <TableCell>C$ {(item.precioUnitario * item.cantidad).toFixed(2)}</TableCell>
-                           
+
                             </TableRow>
                         ))}
                     </TableBody>
