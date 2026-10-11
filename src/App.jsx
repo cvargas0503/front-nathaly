@@ -52,7 +52,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<ProtectedRoute permisoRequerido="ver_dashboard"><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute permisoRequerido="GESTIONAR_USUARIOS"><Dashboard /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/productos" element={<ProtectedRoute permisoRequerido="GESTIONAR_PRODUCTOS"><Productos /></ProtectedRoute>} />
             <Route path="/sucursales" element={<ProtectedRoute permisoRequerido="GESTIONAR_SUCURSALES"><SucursalesPage /></ProtectedRoute>} />
@@ -72,7 +72,7 @@ function App() {
             <Route path="/clientes" element={<ProtectedRoute permisoRequerido="GESTIONAR_CLIENTES"><Clientes /></ProtectedRoute>} />
             <Route path="/facturas" element={<ProtectedRoute permisoRequerido="VER_VENTAS"><Facturas /></ProtectedRoute>} />
             <Route path="/pedidos" element={<ProtectedRoute permisoRequerido="VER_PEDIDOS"><Pedidos /></ProtectedRoute>} />
-            <Route path="/arqueo-caja" element={<ProtectedRoute permisoRequerido="VER_PEDIDOS"><ArqueoCaja /></ProtectedRoute>} />
+            <Route path="/arqueo-caja" element={<ProtectedRoute permisoRequerido="VER_ARQUEOS"><ArqueoCaja /></ProtectedRoute>} />
             <Route path="/ventas-sin-pagar" element={<ProtectedRoute permisoRequerido="PAGAR_VENTAS"><PagoVentas /></ProtectedRoute>} />
             <Route path="/movimientos-caja" element={<ProtectedRoute permisoRequerido="VER_MOVIMIENTOS_CAJA"><MovimientoCaja /></ProtectedRoute>} />
             <Route path="/nuevo-movimiento-caja" element={<ProtectedRoute permisoRequerido="NUEVO_MOVIMIENTO_CAJA"><RegistroCaja /></ProtectedRoute>} />

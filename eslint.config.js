@@ -1,3 +1,4 @@
+import tseslint from 'typescript-eslint'
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -5,6 +6,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { ignores: ['dist'] },
+  ...tseslint.configs.recommended.map(config => ({ ...config, files: ['**/*.{ts,tsx}'] })),
+  { files: ['**/*.{ts,tsx}'], languageOptions: { globals: globals.browser }, rules: { '@typescript-eslint/no-explicit-any': 'off' } },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

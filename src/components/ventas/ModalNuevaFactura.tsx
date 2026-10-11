@@ -2,21 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { obtenerDatosFormularioFactura } from "../../services/datos";
 import ModalMostrarProductos from "./ModalMostrarProductos";
 import { IoTrashOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
-import { NuevaVenta } from "../../services/venta";
-const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFacturas }) => {
-    const [clientes, setClientes] = useState([]);
-    const [sucursales, setSucursales] = useState([]);
-    const [empleados, setEmpleados] = useState([]);
-    const [terminosPago, setTerminosPago] = useState([]);
+import { NuevaVenta, type Factura } from "../../services/venta";
+interface Props {
+  mostrarNuevaFactura: boolean;
+  setMostrarNuevaFactura: (value: boolean) => void;
+  setFacturas: (updater: (previous: Factura[]) => Factura[]) => void;
+}
+interface Catalogo { idCliente?: number; idSucursal?: number; idEmpleado?: number; idTermino?: number; nombre?: string; nombreCompleto?: string; codigo?: string; diasPlazo?: number }
+interface Producto { idProducto: number; referencia: string; precios: Array<{precio: number; tipoPrecio: string}> }
+interface Detalle { producto: Producto; cantidad: number; precio: number }
+const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFacturas }: Props) => {
+    const [clientes, setClientes] = useState<Catalogo[]>([]);
+    const [sucursales, setSucursales] = useState<Catalogo[]>([]);
+    const [empleados, setEmpleados] = useState<Catalogo[]>([]);
+    const [terminosPago, setTerminosPago] = useState<Catalogo[]>([]);
     const [mostrarSelectorProducto, setMostrarSelectorProducto] = useState(false);
     const [form, setForm] = useState({ idCliente: 0, idTermino: 0, idSucursal: 0, idEmpleado: 0, fecha: new Date().toISOString().substring(0, 10) });
-    const [detalle, setDetalle] = useState([]);
+    const [detalle, setDetalle] = useState<Detalle[]>([]);
+    const solicitudPendiente = useRef<{contenido: string; clave: string} | null>(null);
+    const enviando = useRef(false);
     const [cargando, setCargando] = useState(false);
 
 
@@ -41,7 +51,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
             setEmpleados(res.data.empleados)
         }
     };
-    const agregarProductoADetalle = (producto) => {
+    const agregarProductoADetalle = (producto: Producto) => {
         if (detalle.some(item => item.producto.idProducto === producto.idProducto)) {
             console.log("Producto ya agregado al detalle");
             toast.error("Este producto ya fue agregado al detalle.");
@@ -54,11 +64,11 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
         setMostrarSelectorProducto(false);
     };
 
-    const eliminarProducto = (index) => {
+    const eliminarProducto = (index: number) => {
         setDetalle((prev) => prev.filter((_, i) => i !== index));
     };
 
-    const actualizarCantidad = (index, cantidad) => {
+    const actualizarCantidad = (index: number, cantidad: number) => {
         setDetalle((prev) => {
             const actualizado = [...prev];
             actualizado[index].cantidad = cantidad;
@@ -66,7 +76,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
         });
     };
 
-    const actualizarPrecio = (index, precio) => {
+    const actualizarPrecio = (index: number, precio: number) => {
         setDetalle((prev) => {
             const actualizado = [...prev];
             actualizado[index].precio = precio;
@@ -77,6 +87,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
     const limpiarFormulario = () => {
         setForm({ idCliente: 0, idTermino: 0, idSucursal: 0, idEmpleado: 0, fecha: new Date().toISOString().substring(0, 10) });
         setDetalle([]);
+        solicitudPendiente.current = null;
         setMostrarNuevaFactura(false);
     }
     const totalFactura = detalle.reduce((acc, item) => acc + item.cantidad * item.precio, 0);
@@ -118,7 +129,8 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
         return true;
     };
     const guardarFactura = async () => {
-        if (!validarFormulario()) return;
+        if (enviando.current || !validarFormulario()) return;
+        enviando.current = true;
         setCargando(true);
         try {
             const venta = {
@@ -130,22 +142,27 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     descuento: 0
                 }))
             };
-            const res = await NuevaVenta(venta);
+            const contenido = JSON.stringify(venta);
+            if (!solicitudPendiente.current || solicitudPendiente.current.contenido !== contenido) {
+                solicitudPendiente.current = { contenido, clave: crypto.randomUUID() };
+            }
+            const res = await NuevaVenta(venta, solicitudPendiente.current.clave);
             if (res.success) {
                 toast.success("Factura guardada exitosamente.");
-                setFacturas(prev => [...prev, res.data]);
+                setFacturas(prev => prev.some(f => f.idVenta === res.data.idVenta) ? prev : [...prev, res.data]);
                 limpiarFormulario();
             } else {
                 toast.error(res.message || "Error al guardar la factura.");
             }
-        } catch (error) {
+        } catch (error: any) {
             toast.error(error.response?.data?.message ?? "OcurriÃ³ un error inesperado.");
         } finally {
+            enviando.current = false;
             setCargando(false);
         }
     };
 
-    const handleOnOpenChange = (open) => {
+    const handleOnOpenChange = (open: boolean) => {
         if (!open && detalle.length > 0) {
             if (!confirm("Tiene productos agregados. Â¿Desea descartar los cambios?")) return;
         }
@@ -167,7 +184,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Cliente</label>
-                        <select value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: parseInt(e.target.value, 10) })}
+                        <select value={form.idCliente} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, idCliente: parseInt(e.target.value, 10) })}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
                             <option value={0}>Seleccionar Cliente</option>
                             {clientes.map((cliente) => (
@@ -177,7 +194,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">TÃ©rmino de Pago</label>
-                        <select value={form.idTermino} onChange={(e) => setForm({ ...form, idTermino: parseInt(e.target.value, 10) })}
+                        <select value={form.idTermino} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, idTermino: parseInt(e.target.value, 10) })}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
                             <option value={0}>Seleccionar TÃ©rmino</option>
                             {terminosPago.map((termino) => (
@@ -187,7 +204,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Sucursal</label>
-                        <select value={form.idSucursal} onChange={(e) => setForm({ ...form, idSucursal: parseInt(e.target.value, 10) })}
+                        <select value={form.idSucursal} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, idSucursal: parseInt(e.target.value, 10) })}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
                             <option value={0}>Seleccionar Sucursal</option>
                             {sucursales.map((sucursal) => (
@@ -197,7 +214,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Empleado</label>
-                        <select value={form.idEmpleado} onChange={(e) => setForm({ ...form, idEmpleado: parseInt(e.target.value, 10) })}
+                        <select value={form.idEmpleado} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, idEmpleado: parseInt(e.target.value, 10) })}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
                             <option value={0}>Seleccionar Empleado</option>
                             {empleados.map((empleado) => (
@@ -207,7 +224,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Fecha</label>
-                        <Input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="rounded-xl border-slate-200 focus:ring-blue-500/20" />
+                        <Input type="date" value={form.fecha} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, fecha: e.target.value })} className="rounded-xl border-slate-200 focus:ring-blue-500/20" />
                     </div>
                 </div>
 
@@ -243,7 +260,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                             <TableRow key={index}>
                                 <TableCell>{item.producto.referencia}</TableCell>
                                 <TableCell>
-                                    <select value={item.precio} onChange={(e) => actualizarPrecio(index, parseFloat(e.target.value))}>
+                                    <select value={item.precio} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => actualizarPrecio(index, parseFloat(e.target.value))}>
                                         {item.producto.precios.map((p, i) => (
                                             <option key={i} value={p.precio}>{p.tipoPrecio}</option>
                                         ))}
@@ -251,7 +268,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                                 </TableCell>
                                 <TableCell>C$ {item.precio.toFixed(2)}</TableCell>
                                 <TableCell>
-                                    <Input type="number" min="1" value={item.cantidad} onChange={(e) => actualizarCantidad(index, parseInt(e.target.value))} />
+                                    <Input type="number" min="1" value={item.cantidad} onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => actualizarCantidad(index, parseInt(e.target.value))} />
                                 </TableCell>
                                 <TableCell>C$ {(item.precio * item.cantidad).toFixed(2)}</TableCell>
                                 <TableCell>
@@ -270,7 +287,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
 
                 <div className="flex justify-end gap-4 mt-4">
                     <Button variant="outline" onClick={limpiarFormulario}>Cancelar</Button>
-                    <Button onClick={guardarFactura} className="bg-green-600 text-white hover:bg-green-700">Guardar</Button>
+                    <Button disabled={cargando} onClick={guardarFactura} className="bg-green-600 text-white hover:bg-green-700">Guardar</Button>
                     <Button onClick={() => window.print()} className="bg-blue-600 text-white hover:bg-blue-700">Imprimir</Button>
                 </div>
             </DialogContent>
