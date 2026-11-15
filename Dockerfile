@@ -15,6 +15,10 @@ ENV PORT=8080 \
 COPY --from=build --chown=101:101 /app/dist/ /usr/share/nginx/html/
 COPY --chown=101:101 docker/default.conf.template /etc/nginx/templates/default.conf.template
 USER 101:101
+ARG APP_REVISION=development
+LABEL org.opencontainers.image.source="https://github.com/cvargas0503/front-nathaly" \
+      org.opencontainers.image.revision=${APP_REVISION} \
+      org.opencontainers.image.title="Nathaly Frontend"
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD wget -q -O /dev/null http://127.0.0.1:${PORT}/healthz || exit 1
