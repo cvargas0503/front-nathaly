@@ -6,3 +6,6 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.sql text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+*.template text eol=lf
