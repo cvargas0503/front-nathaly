@@ -1,7 +1,10 @@
 import axiosConfig from '../lib/axios';
-export const NuevaVenta = async (form) => {
+export const NuevaVenta = async (form, idempotencyKey) => {
 
-        const response = await axiosConfig.post('/ventas/', form);
+        if (!idempotencyKey) throw new Error('La solicitud de factura requiere una clave de idempotencia.');
+        const response = await axiosConfig.post('/ventas/', form, {
+                headers: { 'Idempotency-Key': idempotencyKey },
+        });
         return response.data;
 
 }

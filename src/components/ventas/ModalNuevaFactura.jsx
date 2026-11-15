@@ -2,13 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { obtenerDatosFormularioFactura } from "../../services/datos";
 import ModalMostrarProductos from "./ModalMostrarProductos";
 import { IoTrashOutline } from "react-icons/io5";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import { NuevaVenta } from "../../services/venta";
+import { createInvoiceSubmission } from "../../lib/invoiceSubmission";
 const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFacturas }) => {
     const [clientes, setClientes] = useState([]);
     const [sucursales, setSucursales] = useState([]);
@@ -18,12 +19,15 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
     const [form, setForm] = useState({ idCliente: 0, idTermino: 0, idSucursal: 0, idEmpleado: 0, fecha: new Date().toISOString().substring(0, 10) });
     const [detalle, setDetalle] = useState([]);
     const [cargando, setCargando] = useState(false);
+    const solicitud = useRef(createInvoiceSubmission());
+    const enviando = useRef(false);
 
 
     useEffect(() => {
         if (mostrarNuevaFactura) {
             cargarDatosIniciales();
         } else {
+            solicitud.current.clear();
             setEmpleados([]);
             setClientes([]);
             setSucursales([]);
@@ -75,6 +79,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
     };
 
     const limpiarFormulario = () => {
+        solicitud.current.clear();
         setForm({ idCliente: 0, idTermino: 0, idSucursal: 0, idEmpleado: 0, fecha: new Date().toISOString().substring(0, 10) });
         setDetalle([]);
         setMostrarNuevaFactura(false);
@@ -118,7 +123,8 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
         return true;
     };
     const guardarFactura = async () => {
-        if (!validarFormulario()) return;
+        if (enviando.current || !validarFormulario()) return;
+        enviando.current = true;
         setCargando(true);
         try {
             const venta = {
@@ -130,7 +136,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
                     descuento: 0
                 }))
             };
-            const res = await NuevaVenta(venta);
+            const res = await NuevaVenta(venta, solicitud.current.keyFor(venta));
             if (res.success) {
                 toast.success("Factura guardada exitosamente.");
                 setFacturas(prev => [...prev, res.data]);
@@ -141,6 +147,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
         } catch (error) {
             toast.error(error.response?.data?.message ?? "OcurriÃ³ un error inesperado.");
         } finally {
+            enviando.current = false;
             setCargando(false);
         }
     };
@@ -270,7 +277,7 @@ const ModalNuevaFactura = ({ mostrarNuevaFactura, setMostrarNuevaFactura, setFac
 
                 <div className="flex justify-end gap-4 mt-4">
                     <Button variant="outline" onClick={limpiarFormulario}>Cancelar</Button>
-                    <Button onClick={guardarFactura} className="bg-green-600 text-white hover:bg-green-700">Guardar</Button>
+                    <Button onClick={guardarFactura} disabled={cargando} className="bg-green-600 text-white hover:bg-green-700">Guardar</Button>
                     <Button onClick={() => window.print()} className="bg-blue-600 text-white hover:bg-blue-700">Imprimir</Button>
                 </div>
             </DialogContent>
